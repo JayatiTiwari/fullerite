@@ -66,6 +66,14 @@ func TestDockerStatsBuildMetrics(t *testing.T) {
 			"MESOS_TASK_ID": "\\.([^\\.]*)\\."}
 	}`)
 	var val map[string]interface{}
+        // prepare disk stats io stats dummy test data
+        diskStats := make(map[string][]string)
+        statVals := []string{"202", "1", "nvme0n1", "39757175", "4069", "1474473221", "15781084", "195016023", "83149828", "4027089904", "134530008", "0", "98404384" ,"150301288"}
+        diskStats["nvme0n1"] = statVals
+
+        var diskIOStatsList []DiskIOStats
+        deviceOne := DiskIOStats{"nvme0n1", 202, 2, "/nail", 3.9686986, 1.9316838}
+        diskIOStatsList = append(diskIOStatsList, deviceOne)
 
 	err := json.Unmarshal(envVars, &val)
 	assert.Equal(t, err, nil)
@@ -167,8 +175,155 @@ func TestDockerStatsBuildMetrics(t *testing.T) {
 
 	d := getSUT()
 	d.Configure(config)
-	ret := d.buildMetrics(container, stats, 0.5)
+	ret := d.buildMetrics(container, stats, 0.5, diskStats, diskIOStatsList)
 	assert.Equal(t, ret, expectedMetrics)
+}
+
+func TestDockerStatsBuildMetricsWithEmitDiskMetrics(t *testing.T) {
+        config := make(map[string]interface{})
+        envVars := []byte(`
+        {
+                "service_name":  {
+                        "MESOS_TASK_ID": "[^\\.]*"
+                },
+                "instance_name": {
+                        "MESOS_TASK_ID": "\\.([^\\.]*)\\."}
+        }`)
+        var val map[string]interface{}
+
+        // prepare disk stats io stats dummy test data
+        diskStats := make(map[string][]string)
+        statVals := []string{"202", "1", "testDevice", "39757175", "4069", "1474473221", "15781084", "195016023", "83149828", "4027089904", "134530008", "0", "98404384" ,"150301288"}
+        diskStats["test-id"] = statVals
+
+        var diskIOStatsList []DiskIOStats
+        diskIOStatsList = append(diskIOStatsList, DiskIOStats{"testDevice", 202, 0, "testSource", 0, 0})
+
+        err := json.Unmarshal(envVars, &val)
+        assert.Equal(t, err, nil)
+        config["generatedDimensions"] = val
+
+        stats := new(docker.Stats)
+        stats.Networks = make(map[string]docker.NetworkStats)
+        stats.Networks["eth0"] = docker.NetworkStats{RxBytes: 10, TxBytes: 20}
+        stats.MemoryStats.Stats.Rss = 50
+        stats.MemoryStats.Limit = 70
+        stats.CPUStats.ThrottlingData.ThrottledPeriods = 123
+        stats.CPUStats.ThrottlingData.ThrottledTime = 456
+        stats.BlkioStats.IOServiceBytesRecursive = []docker.BlkioStatsEntry{
+                docker.BlkioStatsEntry{
+                        Major: 1,
+                        Minor: 2,
+                        Op:    "Read",
+                        Value: 1234,
+                },
+                docker.BlkioStatsEntry{
+                        Major: 3,
+                        Minor: 4,
+                        Op:    "Write",
+                        Value: 5678,
+                },
+        }
+        stats.BlkioStats.IOServicedRecursive = []docker.BlkioStatsEntry{
+                docker.BlkioStatsEntry{
+                        Major: 3,
+                        Minor: 4,
+                        Op:    "Total",
+                        Value: 1111,
+                },
+        }
+
+        containerJSON := []byte(`
+        {
+                "ID": "test-id",
+                "Name": "test-container",
+                "SizeRw": 1234,
+                "SizeRootFs": 5678,
+                "Config": {
+                        "Env": [
+                                "MESOS_TASK_ID=my--service.main.blablagit6bdsadnoise",
+                                "PAASTA_INSTANCE=test_instance",
+                                "PAASTA_SERVICE=test_service",
+                                "PAASTA_CLUSTER=test_cluster"
+                        ]
+                },
+                "Mounts": [
+                        {
+                                "Type": "bind",
+                                "Source": "testSource",
+                                "Destination": "testDestination",
+                                "Propagation": "rprivate",
+                                "Mode": "testMode",
+                                "RW": true
+                        }
+                ]
+        }`)
+        var container *docker.Container
+        err = json.Unmarshal(containerJSON, &container)
+        assert.Equal(t, err, nil)
+
+        baseDims := map[string]string{
+                "container_id":   "test-id",
+                "container_name": "test-container",
+                "service_name":   "my_service",
+                "instance_name":  "main",
+        }
+        netDims := map[string]string{
+                "container_id":   "test-id",
+                "container_name": "test-container",
+                "service_name":   "my_service",
+                "instance_name":  "main",
+                "iface":          "eth0",
+        }
+        dev12Dims := map[string]string{
+                "container_id":   "test-id",
+                "container_name": "test-container",
+                "service_name":   "my_service",
+                "instance_name":  "main",
+                "blkdev":         "1:2",
+        }
+        dev34Dims := map[string]string{
+                "container_id":   "test-id",
+                "container_name": "test-container",
+                "service_name":   "my_service",
+                "instance_name":  "main",
+                "blkdev":         "3:4",
+        }
+        expectedDimsGen := map[string]string{
+                "service_name":  "my_service",
+                "instance_name": "main",
+        }
+        expectedDimsDisk := map[string]string{
+                "deviceName":   "testDevice",
+                "paastaService": "test_service",
+                "paastaInstance":   "test_instance",
+                "paastaCluster":   "test_cluster",
+        }
+
+        expectedMetrics := []metric.Metric{
+                metric.Metric{"DockerMemoryUsed", "gauge", 50, baseDims},
+                metric.Metric{"DockerMemoryLimit", "gauge", 70, baseDims},
+                metric.Metric{"DockerCpuPercentage", "gauge", 0.5, baseDims},
+                metric.Metric{"DockerCpuThrottledPeriods", "cumcounter", 123, baseDims},
+                metric.Metric{"DockerCpuThrottledNanoseconds", "cumcounter", 456, baseDims},
+                metric.Metric{"DockerLocalDiskUsed", "gauge", 1234, baseDims},
+                metric.Metric{"DockerImageLocalDiskUsed", "gauge", 5678, baseDims},
+                metric.Metric{"DockerTxBytes", "cumcounter", 20, netDims},
+                metric.Metric{"DockerRxBytes", "cumcounter", 10, netDims},
+                metric.Metric{"DockerBlkDeviceReadBytes", "cumcounter", 1234, dev12Dims},
+                metric.Metric{"DockerBlkDeviceWriteBytes", "cumcounter", 5678, dev34Dims},
+                metric.Metric{"DockerBlkDeviceTotalRequests", "cumcounter", 1111, dev34Dims},
+                metric.Metric{"DockerContainerCount", "counter", 1, expectedDimsGen},
+                metric.Metric{"DockerDiskReads", "gauge", 0, expectedDimsDisk},
+                metric.Metric{"DockerDiskWrites", "gauge", 0, expectedDimsDisk},
+                metric.Metric{"DockerDiskIO", "gauge", 0, expectedDimsDisk},
+        }
+
+                d := getSUT()
+                d.Configure(config)
+                d.emitDiskMetrics = true
+                ret := d.buildMetrics(container, stats, 0.5, diskStats, diskIOStatsList)
+                assert.Equal(t, ret, expectedMetrics)
 }
 
 func TestDockerStatsBuildwithEmitImageName(t *testing.T) {
@@ -182,6 +337,14 @@ func TestDockerStatsBuildwithEmitImageName(t *testing.T) {
 			"MESOS_TASK_ID": "\\.([^\\.]*)\\."}
 	}`)
 	var val map[string]interface{}
+
+        // prepare disk stats io stats dummy test data
+        diskStats := make(map[string][]string)
+        statVals := []string{"202", "1", "test-id", "39757175", "4069", "1474473221", "15781084", "195016023", "83149828", "4027089904", "134530008", "0", "98404384" ,"150301288"}
+        diskStats["test-id"] = statVals
+
+        var diskIOStatsList []DiskIOStats
+        diskIOStatsList = append(diskIOStatsList, DiskIOStats{"test-id", 202, 0, "testSource", 0, 0})
 
 	err := json.Unmarshal(envVars, &val)
 	assert.Equal(t, err, nil)
@@ -243,7 +406,7 @@ func TestDockerStatsBuildwithEmitImageName(t *testing.T) {
 	d := getSUT()
 	d.Configure(config)
 	d.emitImageName = true
-	ret := d.buildMetrics(container, stats, 0.5)
+	ret := d.buildMetrics(container, stats, 0.5, diskStats, diskIOStatsList)
 	assert.Equal(t, ret, expectedMetrics)
 }
 
@@ -256,8 +419,15 @@ func TestDockerStatsBuildMetricsWithNameAsEnvVariable(t *testing.T) {
 		}
 	}`)
 	var val map[string]interface{}
+        // prepare disk stats io stats dummy test data
+        diskStats := make(map[string][]string)
+        statVals := []string{"202", "1", "test-id", "39757175", "4069", "1474473221", "15781084", "195016023", "83149828", "4027089904", "134530008", "0", "98404384" ,"150301288"}
+        diskStats["test-id"] = statVals
 
-	err := json.Unmarshal(envVars, &val)
+        var diskIOStatsList []DiskIOStats
+        diskIOStatsList = append(diskIOStatsList, DiskIOStats{"test-id", 202, 0, "testSource", 0, 0})
+
+        err := json.Unmarshal(envVars, &val)
 	assert.Equal(t, err, nil)
 	config["generatedDimensions"] = val
 
@@ -303,7 +473,7 @@ func TestDockerStatsBuildMetricsWithNameAsEnvVariable(t *testing.T) {
 
 	d := getSUT()
 	d.Configure(config)
-	ret := d.buildMetrics(container, stats, 0.5)
+	ret := d.buildMetrics(container, stats, 0.5, diskStats, diskIOStatsList)
 
 	assert.Equal(t, ret, expectedMetrics)
 }
