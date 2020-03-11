@@ -294,10 +294,10 @@ func TestDockerStatsBuildMetricsWithEmitDiskMetrics(t *testing.T) {
                 "instance_name": "main",
         }
         expectedDimsDisk := map[string]string{
-                "deviceName":   "testDevice",
-                "paastaService": "test_service",
-                "paastaInstance":   "test_instance",
-                "paastaCluster":   "test_cluster",
+                "device_name":   "testDevice",
+                "paasta_service": "test_service",
+                "paasta_instance":   "test_instance",
+                "paasta_cluster":   "test_cluster",
         }
 
         expectedMetrics := []metric.Metric{
