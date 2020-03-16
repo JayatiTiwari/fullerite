@@ -28,7 +28,7 @@ func getFakeUWSGIWorkerStatsResponse() []byte {
 
 func getFakeHTTPResponse() []byte {
 	return []byte(`{
-        "utilization": "0.75"
+        "utilization": 0.75
 	}`)
 }
 
@@ -50,7 +50,7 @@ func TestConfigureHPAMetrics(t *testing.T) {
 
 func TestSanitizeDimensions(t *testing.T) {
 	var dimensions = map[string]string{"paasta.yelp.com/instance": "fake-instance"}
-	assert.Equal(t, "fake-instance", sanitizeDimensions(dimensions)["paasta_yelp_com_instance"])
+	assert.Equal(t, "fake-instance", sanitizeDimensions(dimensions)["paasta_instance"])
 }
 
 func TestParseMetrics(t *testing.T) {

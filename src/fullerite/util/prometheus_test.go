@@ -324,7 +324,7 @@ func TestExtractPrometheusMetricsWithPrefixAndWhitelist(t *testing.T) {
 	actualMetrics, err := ExtractPrometheusMetrics(
 		body,
 		contentType,
-		&map[string]bool{
+		map[string]bool{
 			"process_virtual_memory_bytes":     true,
 			"go_memstats_last_gc_time_seconds": true,
 		},
@@ -366,7 +366,7 @@ func TestPrometheusExtractMetricsWithBlacklist(t *testing.T) {
 		body,
 		contentType,
 		nil,
-		&map[string]bool{
+		map[string]bool{
 			"process_virtual_memory_bytes":                   true,
 			"kubelet_docker_operations_latency_microseconds": true,
 			"kubelet_cgroup_manager_duration_seconds":        true,

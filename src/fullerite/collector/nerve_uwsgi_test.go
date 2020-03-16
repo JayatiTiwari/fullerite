@@ -393,7 +393,8 @@ func TestErrorQueryEndpointResponse(t *testing.T) {
 	endpoint := ts.URL + "/status/metrics"
 	ts.Close()
 
-	_, _, queryEndpointError := queryEndpoint(endpoint, 10)
+	headers := make(map[string]string)
+	_, _, queryEndpointError := queryEndpoint(endpoint, headers, 10)
 	assert.NotNil(t, queryEndpointError)
 
 	//Socket closed test
@@ -402,7 +403,7 @@ func TestErrorQueryEndpointResponse(t *testing.T) {
 	}))
 	tsClosed.Close()
 	closedEndpoint := tsClosed.URL + "/status/metrics"
-	_, queryClosedEndpointResponse, queryClosedEndpointError := queryEndpoint(closedEndpoint, 10)
+	_, queryClosedEndpointResponse, queryClosedEndpointError := queryEndpoint(closedEndpoint, headers, 10)
 	assert.NotNil(t, queryClosedEndpointError)
 	assert.Equal(t, "", queryClosedEndpointResponse)
 

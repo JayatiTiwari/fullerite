@@ -10,13 +10,13 @@ import (
 	"net"
 	"net/http"
 	"runtime"
+	"strings"
 
 	l "github.com/Sirupsen/logrus"
 )
 
 const (
-	defaultPort        = 19090
-	defaultMetricsPath = "/metrics"
+	defaultPort = 19090
 )
 
 // InternalServer will collect from each handler the status and return it over HTTP
@@ -25,7 +25,6 @@ type InternalServer struct {
 	handlerStatFunc   InternalStatFunc
 	collectorStatFunc InternalStatFunc
 	port              int
-	path              string
 }
 
 // InternalStatFunc can be used to extract metrics
@@ -48,10 +47,11 @@ func New(cfg config.Config, h InternalStatFunc, c InternalStatFunc) *InternalSer
 	return srv
 }
 
-// Run starts a server on the specified port listening for the provided path
+// Run starts a server on the specified port
 func (srv *InternalServer) Run() {
-	srv.log.Info(fmt.Sprintf("Starting to run internal metrics server on port %d on path %s", srv.port, srv.path))
-	http.HandleFunc(srv.path, srv.handleInternalMetricsRequest)
+	srv.log.Info(fmt.Sprintf("Starting to run internal metrics server on port %d", srv.port))
+	http.HandleFunc("/metrics", srv.handleInternalMetricsRequest)
+	http.HandleFunc("/metrics/prometheus", srv.handlePrometheusMetricsRequest)
 
 	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", srv.port))
 	if err != nil {
@@ -71,12 +71,6 @@ func (srv *InternalServer) configure(cfgMap map[string]interface{}) {
 		srv.port = config.GetAsInt(val, defaultPort)
 	} else {
 		srv.port = defaultPort
-	}
-
-	if val, exists := (cfgMap)["path"]; exists {
-		srv.path = val.(string)
-	} else {
-		srv.path = defaultMetricsPath
 	}
 }
 
@@ -109,6 +103,49 @@ func (srv InternalServer) handleInternalMetricsRequest(writer http.ResponseWrite
 
 	srv.log.Debug("Finished building response: ", rspString)
 	io.WriteString(writer, rspString)
+}
+
+func (srv InternalServer) handlePrometheusMetricsRequest(writer http.ResponseWriter, req *http.Request) {
+	prometheusInternalMetricsMemoryStats(writer)
+	prometheusInternalMetricsHandlerStats(writer, srv.handlerStatFunc())
+	prometheusInternalMetricsCollectorStats(writer, srv.collectorStatFunc())
+}
+
+func prometheusInternalMetricsMemoryStats(writer http.ResponseWriter) {
+	prometheusInternalMetricsEmit("memory", "", writer, getMemoryStats(), true)
+}
+
+func prometheusInternalMetricsHandlerStats(writer http.ResponseWriter, stats map[string]metric.InternalMetrics) {
+	emitTypes := true
+	for hName, h := range stats {
+		prometheusInternalMetricsEmit("handler", fmt.Sprintf("handler=\"%s\"", hName), writer, &h, emitTypes)
+		emitTypes = false
+	}
+}
+
+func prometheusInternalMetricsCollectorStats(writer http.ResponseWriter, stats map[string]metric.InternalMetrics) {
+	emitTypes := true
+	for hName, h := range stats {
+		prometheusInternalMetricsEmit("handler", fmt.Sprintf("collector=\"%s\"", hName), writer, &h, emitTypes)
+		emitTypes = false
+	}
+}
+
+func prometheusInternalMetricsEmit(namePrefix string, dimString string, writer http.ResponseWriter, im *metric.InternalMetrics, emitTypes bool) {
+	for k, v := range im.Counters {
+		metricName := strings.Replace(k, ".", "_", -1)
+		if emitTypes {
+			io.WriteString(writer, fmt.Sprintf("# TYPE fullerite_internal_%s_%s_count counter\n", namePrefix, metricName))
+		}
+		io.WriteString(writer, fmt.Sprintf("fullerite_internal_%s_%s_count{%s} %f\n", namePrefix, metricName, dimString, v))
+	}
+	for k, v := range im.Gauges {
+		metricName := strings.Replace(k, ".", "_", -1)
+		if emitTypes {
+			io.WriteString(writer, fmt.Sprintf("# TYPE fullerite_internal_%s_%s gauge\n", namePrefix, metricName))
+		}
+		io.WriteString(writer, fmt.Sprintf("fullerite_internal_%s_%s{%s} %f\n", namePrefix, metricName, dimString, v))
+	}
 }
 
 // responsible for querying each handler and serializing the total response

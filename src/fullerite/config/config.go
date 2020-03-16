@@ -159,6 +159,15 @@ func GetAsMap(value interface{}) (result map[string]string) {
 	return
 }
 
+// GetAsSet parses a string to a map[string]string
+func GetAsSet(value interface{}) (result map[string]bool) {
+	result = make(map[string]bool)
+	for _, v := range GetAsSlice(value) {
+		result[v] = true
+	}
+	return
+}
+
 // GetAsSlice : Parses a json array string to []string
 func GetAsSlice(value interface{}) []string {
 	result := []string{}

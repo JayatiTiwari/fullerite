@@ -172,3 +172,15 @@ func TestParseBadConfig(t *testing.T) {
 	_, err := config.ReadConfig(tmpTestBadFile)
 	assert.NotNil(t, err, "should fail")
 }
+
+func TestGetAsSet(t *testing.T) {
+	assert := assert.New(t)
+
+	// Test if string array can be converted to map[string]bool
+	stringToParse := "[\"runtimeenv\", \"region\"]"
+	expectedValue := map[string]bool{
+		"runtimeenv": true,
+		"region":     true,
+	}
+	assert.Equal(config.GetAsSet(stringToParse), expectedValue)
+}
