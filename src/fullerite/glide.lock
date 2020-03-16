@@ -1,5 +1,5 @@
-hash: 4b063a47b42e2e33b6af9d0d8a2909027bd36cfb5908bbbcba4ceb448de834f1
-updated: 2020-01-22T04:28:48.524176326-08:00
+hash: 5eeec295ea9a3d61d89735bfbee5a75f32f12fcb1e7e783b3282a5f5cbf45010
+updated: 2020-03-12T11:34:41.680398868-07:00
 imports:
 - name: github.com/alyu/configparser
   version: 26b2fe18bee125de2a3090d6fadb7e280e63eba6
@@ -9,6 +9,8 @@ imports:
   version: d6e3b3328b783f23731bc4d058875b0371ff8109
   subpackages:
   - winterm
+- name: github.com/cespare/xxhash
+  version: d7df74196a9e781ede915320c11c378c1b2f3a1f
 - name: github.com/codegangsta/cli
   version: 8cea2901d4b2c28b97001e67a7d2d60e227f3da6
 - name: github.com/containerd/containerd
@@ -117,6 +119,11 @@ imports:
   - xfs
 - name: github.com/prometheus/prometheus
   version: d9613e5c466c6e9de548c4dae1b9aabf9aaf7c57
+  subpackages:
+  - pkg/exemplar
+  - pkg/labels
+  - pkg/textparse
+  - pkg/value
 - name: github.com/samuel/go-thrift
   version: 5165175b40afa0d250de9a330d47c1ea2051589f
   subpackages:
@@ -128,6 +135,8 @@ imports:
   - hooks/test
 - name: github.com/sirupsen/logrus
   version: 67a7fdcf741f4d5cee82cb9800994ccfd4393ad0
+- name: github.com/yookoala/realpath
+  version: d19ef9c409d9817c1e685775e53d361b03eabbc8
 - name: golang.org/x/net
   version: cdfb69ac37fc6fa907650654115ebebb3aae2087
   subpackages:

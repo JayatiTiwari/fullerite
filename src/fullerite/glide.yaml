@@ -1,5 +1,7 @@
 package: fullerite
 import:
+- package: github.com/yookoala/realpath
+  version: d19ef9c409d9817c1e685775e53d361b03eabbc8
 - package: github.com/Sirupsen/logrus
   version: d26492970760ca5d33129d2d799e34be5c4782eb
 - package: github.com/alyu/configparser
