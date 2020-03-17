@@ -429,13 +429,14 @@ func (d DockerStats) ObtainDiskStats() (map[string][]string, error) {
 		} else {
 			d.log.Warning("This record of /proc/diskstats does not contain the required number of fields: " + line + " Shall not be processed.")
 		}
-
-		if err != io.EOF {
-			d.log.Error("Failed!: ", err)
-		}
 	}
 
-	return devNameMinMajMap, err
+	if err != io.EOF {
+		d.log.Error("Failed!: ", err)
+		return nil, err
+	}
+
+	return devNameMinMajMap, nil
 }
 
 // returns a collection of records each having (device name, major, minor, mount path, reads, writes)
@@ -506,6 +507,7 @@ func (d DockerStats) ObtainDiskIOStats(diskStats map[string][]string) ([]DiskIOS
 	}
 	if err != io.EOF {
 		d.log.Error("Failed!: ", err)
+		return nil, err
 	}
 	return diskIOStatsList, err
 }
@@ -556,7 +558,7 @@ func (d DockerStats) ObtainDiskIOAndPaastaStats(container *docker.Container, dis
 func ObtainRealPath(mountPath string) (string, error) {
 	mountPathReal, err := realpath.Realpath(mountPath)
 	if err == nil {
-		return mountPathReal, nil
+		return mountPathReal, err
 	}
-	return mountPath, err
+	return "", err
 }
