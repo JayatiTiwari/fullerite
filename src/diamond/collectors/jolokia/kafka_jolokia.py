@@ -11,9 +11,10 @@ Collect Kafka metrics using jolokia agent
 ```
 """
 
-from jolokia import JolokiaCollector, MBean
 import re
-import sys
+
+from jolokia import JolokiaCollector
+
 
 class KafkaJolokiaCollector(JolokiaCollector):
     TOTAL_TOPICS = re.compile('kafka\.server:name=.*PerSec,type=BrokerTopicMetrics')
@@ -57,6 +58,7 @@ class KafkaJolokiaCollector(JolokiaCollector):
         # that, metric has no topic associated with it and is really for all topics on that broker
         if re.match(self.TOTAL_TOPICS, bean.prefix):
             dims["topic"] = "_TOTAL_"
+        dims.update(self.host_custom_dimensions)
         return metric_name, metric_type, dims
 
     def patch_metric_name(self, bean, metric_name_list):

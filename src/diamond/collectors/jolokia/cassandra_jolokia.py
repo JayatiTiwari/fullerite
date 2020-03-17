@@ -20,11 +20,12 @@ CassandraJolokiaCollector.conf
 ```
 """
 
-from diamond.collector import str_to_bool
-from jolokia import JolokiaCollector, MBean
 import math
-import string
 import re
+
+from diamond.collector import str_to_bool
+
+from jolokia import JolokiaCollector
 
 
 class CassandraJolokiaCollector(JolokiaCollector):
@@ -34,10 +35,10 @@ class CassandraJolokiaCollector(JolokiaCollector):
                             self).get_default_config_help()
         config_help.update({
             'percentiles':
-            'Comma separated list of percentiles to be collected '
-            '(e.g., "50,95,99").',
+                'Comma separated list of percentiles to be collected '
+                '(e.g., "50,95,99").',
             'histogram_regex':
-            'Filter to only process attributes that match this regex',
+                'Filter to only process attributes that match this regex',
             'nested': 'Whether or not to enable nested values from JMX'
         })
         return config_help
@@ -72,29 +73,13 @@ class CassandraJolokiaCollector(JolokiaCollector):
             elif isinstance(v, list) and str_to_bool(self.config['nested']):
                 self.interpret_bean_with_list("%s.%s" % (prefix, k), v)
 
-    # override to only return the hosts whose identifiers begin with cassandra_
-    def patch_host_list(self, hosts):
-        res = {}
-        for service_name, value in hosts.iteritems():
-            matched = re.match('^(cassandra_[\\w_-]+)', service_name)
-            if matched:
-                cassandra_cluster = matched.group(1)
-                res[cassandra_cluster] = {
-                    'host': value.get('host'),
-                    'port': self.config['port']
-                }
-        return res
-
     def patch_dimensions(self, bean, dims):
         metric_name = dims.pop("name", None)
         metric_type = dims.pop("type", None)
         scope_type = dims.pop("scope", None)
         if scope_type:
             dims["type"] = scope_type
-
-        if self.config["multiple_hosts_mode"] and self.current_host_identifier:
-            dims["cassandra_cluster"] = re.sub('^cassandra_', '', self.current_host_identifier)
-
+        dims.update(self.host_custom_dimensions)
         return metric_name, metric_type, dims
 
     def patch_metric_name(self, bean, metric_name_list):

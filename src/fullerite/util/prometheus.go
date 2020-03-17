@@ -25,8 +25,8 @@ func trimSuffix(name string, suffix string) (string, bool) {
 func ExtractPrometheusMetrics(
 	body []byte,
 	contentType string,
-	metricsWhitelist *map[string]bool,
-	metricsBlacklist *map[string]bool,
+	metricsWhitelist map[string]bool,
+	metricsBlacklist map[string]bool,
 	prefix string,
 	generatedDimensions map[string]string,
 	log *l.Entry,
@@ -76,11 +76,11 @@ func ExtractPrometheusMetrics(
 		}
 
 		if metricsWhitelist != nil {
-			if _, ok := (*metricsWhitelist)[metricName]; !ok {
+			if _, ok := metricsWhitelist[metricName]; !ok {
 				continue
 			}
 		} else if metricsBlacklist != nil {
-			if _, ok := (*metricsBlacklist)[metricName]; ok {
+			if _, ok := metricsBlacklist[metricName]; ok {
 				continue
 			}
 		}

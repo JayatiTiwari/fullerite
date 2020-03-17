@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"fullerite/config"
 	"fullerite/dropwizard"
 	"fullerite/metric"
 	"fullerite/util"
@@ -385,6 +386,32 @@ func TestConfigNerveUWSGI(t *testing.T) {
 	assert.Equal(t, 12, inst.timeout)
 }
 
+func TestConfigNerveUWSGIserviceHeadersMap(t *testing.T) {
+
+	content := []byte(`{
+	"interval": 345,
+	"configFilePath": "/tmp/nerve/nerve.conf.json",
+	"queryPath": "status/metrics",
+	"http_timeout": 12,
+	"serviceHeaders": {
+		"yelp-main": {
+			"Host": "internalapi"
+		}
+	}
+}`)
+	tmpfile, _ := ioutil.TempFile("", "")
+	tmpfile.Write(content)
+	tmpfile.Close()
+	defer os.Remove(tmpfile.Name()) // clean up
+
+	cfg, _ := config.ReadCollectorConfig(tmpfile.Name())
+
+	inst := getTestNerveUWSGI()
+	inst.Configure(cfg)
+
+	assert.Equal(t, map[string]string{"Host": "internalapi"}, inst.serviceHeadersMap["yelp-main"])
+}
+
 func TestErrorQueryEndpointResponse(t *testing.T) {
 	//4xx HTTP status code test
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -393,7 +420,8 @@ func TestErrorQueryEndpointResponse(t *testing.T) {
 	endpoint := ts.URL + "/status/metrics"
 	ts.Close()
 
-	_, _, queryEndpointError := queryEndpoint(endpoint, 10)
+	headers := make(map[string]string)
+	_, _, queryEndpointError := queryEndpoint(endpoint, headers, 10)
 	assert.NotNil(t, queryEndpointError)
 
 	//Socket closed test
@@ -402,7 +430,7 @@ func TestErrorQueryEndpointResponse(t *testing.T) {
 	}))
 	tsClosed.Close()
 	closedEndpoint := tsClosed.URL + "/status/metrics"
-	_, queryClosedEndpointResponse, queryClosedEndpointError := queryEndpoint(closedEndpoint, 10)
+	_, queryClosedEndpointResponse, queryClosedEndpointError := queryEndpoint(closedEndpoint, headers, 10)
 	assert.NotNil(t, queryClosedEndpointError)
 	assert.Equal(t, "", queryClosedEndpointResponse)
 

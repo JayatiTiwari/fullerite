@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -27,6 +26,8 @@ var metricsEndpoints = map[string]string{"uwsgi": "status/uwsgi", "http": "statu
 var dimensionSanitizer = strings.NewReplacer(
 	".", "_",
 	"/", "_")
+var filterNameReplacer = strings.NewReplacer(
+	"paasta_yelp_com", "paasta")
 
 // HPAMetrics An example of custom options of configMap is
 // {
@@ -54,12 +55,13 @@ func init() {
 	RegisterCollector("HPAMetrics", newHPAMetrics)
 }
 
-// sanitizeDimensions replaces "/" or "_" in all  dimension keys and returns a copy
-// of the map.
+// sanitizeDimensions replaces "/" or "_", and replace paasta_yelp_com with paasta 
+// in all dimension keys and returns a copy // of the map.
 func sanitizeDimensions(labels map[string]string) map[string]string {
 	sanitizedDimensions := make(map[string]string)
 	for k, v := range labels {
-		sanitizedDimensions[dimensionSanitizer.Replace(k)] = v
+		tmp := dimensionSanitizer.Replace(k)
+		sanitizedDimensions[filterNameReplacer.Replace(tmp)] = v
 	}
 	return sanitizedDimensions
 }
@@ -71,11 +73,11 @@ func parseHTTPMetrics(raw []byte) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-	utilization, ok := result["utilization"].(string)
+	utilization, ok := result["utilization"].(float64)
 	if !ok {
-		return 0, fmt.Errorf("\"utilization\" field not found or not a string")
+		return 0, fmt.Errorf("\"utilization\" field not found or not a float")
 	}
-	return strconv.ParseFloat(utilization, 64)
+	return utilization, nil
 }
 
 // parseUWSGIMetrics return the percentage of non-idle workers.
@@ -258,7 +260,7 @@ func (d *HPAMetrics) CollectMetricsForPod(pod *corev1.Pod) {
 	for k, v := range d.additionalDimensions {
 		labels[k] = v
 	}
-	// For all metrics, if their dimension is empty, use labels as dimension.
+	// For all metrics, use labels as dimension, and update with user specified dimensions.
 	for _, metric := range metrics {
 		url := fmt.Sprintf("http://%s:%d/%s", podIP, containerPort, metricsEndpoints[metric.name])
 		raw, err := d.getFromURL(url)
@@ -266,7 +268,7 @@ func (d *HPAMetrics) CollectMetricsForPod(pod *corev1.Pod) {
 			return
 		}
 		var value float64
-		switch metricName {
+		switch metric.name {
 		case "uwsgi":
 			{
 				tmp, uwsgiErr := parseUWSGIMetrics(raw)
@@ -285,12 +287,15 @@ func (d *HPAMetrics) CollectMetricsForPod(pod *corev1.Pod) {
 					return
 				}
 			}
+		default:
+			{
+				d.log.Error("Unknown metric name ", metric.name)
+				return
+			}
 		}
-		var sanitizedDimensions map[string]string
-		if len(metric.dimensions) == 0 {
-			sanitizedDimensions = sanitizeDimensions(labels)
-		} else {
-			sanitizedDimensions = sanitizeDimensions(metric.dimensions)
+		var sanitizedDimensions map[string]string = sanitizeDimensions(labels)
+		for k, v := range sanitizeDimensions(metric.dimensions) {
+			sanitizedDimensions[k] = v
 		}
 		d.Channel() <- d.buildHPAMetric(metric.name, sanitizedDimensions, value)
 	}

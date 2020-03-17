@@ -5,25 +5,24 @@
 from test import CollectorTestCase
 from test import get_collector_config
 from test import unittest
+
+from diamond.collector import Collector
+from dimension_reader import CompositeDimensionReader
+from test_readers import TestHostReader, TestDimensionReader
+from jolokia import JolokiaCollector
 from mock import Mock
 from mock import patch
 
-from diamond.collector import Collector
-
-from jolokia import JolokiaCollector
 
 ################################################################################
 
-def read_host_list():
-    return {
-        'host1': { 'host': '10.0.0.1', 'port': 8999 },
-        'host2': { 'host': '10.0.0.2', 'port': 8999 }
-    }
+def test_hosts():
+    return ["10.0.0.1", "10.0.0.2"]
+
 
 class TestJolokiaCollector(CollectorTestCase):
     def setUp(self):
         config = get_collector_config('JolokiaCollector', {})
-
         self.collector = JolokiaCollector(config, None)
 
     def test_import(self):
@@ -36,6 +35,7 @@ class TestJolokiaCollector(CollectorTestCase):
                 return self.getFixture('listing')
             else:
                 return self.getFixture('stats')
+
         patch_urlopen = patch('urllib2.urlopen', Mock(side_effect=se))
 
         patch_urlopen.start()
@@ -50,28 +50,34 @@ class TestJolokiaCollector(CollectorTestCase):
 
     @patch.object(Collector, 'publish')
     def test_should_work_in_mutiple_hosts_mode(self, publish_mock):
-        self.collector.read_host_list = read_host_list
+        port = self.collector.config['port']
+        host_reader = self.collector.host_reader
+        hosts = test_hosts()
         self.collector.config['multiple_hosts_mode'] = True
+        self.collector.host_reader = TestHostReader(hosts)
         requested_list_urls = []
+
         def se(url):
             list_urls = [
-                'http://%s:%s/jolokia/list' % (h.get('host'), h.get('port'))
-                for h in read_host_list().values()
+                'http://%s:%s/jolokia/list' % (host, port)
+                for host in hosts
             ]
             if any(_url in url for _url in list_urls):
                 requested_list_urls.append(url)
                 return self.getFixture('listing')
             else:
                 return self.getFixture('stats')
+
         patch_urlopen = patch('urllib2.urlopen', Mock(side_effect=se))
 
         with patch_urlopen:
             self.collector.collect()
         self.collector.config['mutiple_hosts_mode'] = False
+        self.collector.host_reader = host_reader
 
         self.assertTrue(all(
-            "%s:%s" % (h.get('host'), h.get('port')) in requested_list_urls[i]
-            for i, h in enumerate(read_host_list().values())
+            "%s:%s" % (h, port) in requested_list_urls[i]
+            for i, h in enumerate(hosts)
         ))
 
         metrics = self.get_metrics()
@@ -87,6 +93,7 @@ class TestJolokiaCollector(CollectorTestCase):
                 return self.getFixture('listing')
             else:
                 return self.getFixture('stats')
+
         patch_urlopen = patch('urllib2.urlopen', Mock(side_effect=se))
 
         patch_urlopen.start()
@@ -99,8 +106,7 @@ class TestJolokiaCollector(CollectorTestCase):
 
     @patch.object(Collector, 'publish')
     def test_should_fail_gracefully(self, publish_mock):
-        patch_urlopen = patch('urllib2.urlopen', Mock(
-                              return_value=self.getFixture('stats_blank')))
+        patch_urlopen = patch('urllib2.urlopen', Mock(return_value=self.getFixture('stats_blank')))
 
         patch_urlopen.start()
         self.collector.collect()
@@ -117,6 +123,7 @@ class TestJolokiaCollector(CollectorTestCase):
                 return self.getFixture('stats_error')
             else:
                 return self.getFixture('stats')
+
         patch_urlopen = patch('urllib2.urlopen', Mock(side_effect=se))
 
         patch_urlopen.start()
@@ -128,6 +135,28 @@ class TestJolokiaCollector(CollectorTestCase):
                            metrics=metrics,
                            defaultpath=self.collector.config['url_path'])
         self.assertPublishedMany(publish_mock, metrics)
+
+    @patch.object(Collector, 'publish')
+    def test_should_set_custom_dimensions(self, publish_mock):
+        def se(url):
+            if 'http://localhost:8778/jolokia/list' in url:
+                return self.getFixture('listing_with_bad_mbean')
+            elif 'p=read/xxx.bad.package:*' in url:
+                return self.getFixture('stats_error')
+            else:
+                return self.getFixture('stats')
+
+        dims = {'localhost': {'dim1': 'v1', 'dim2': 'v2'}}
+        self.collector.dimension_reader = TestDimensionReader(dims)
+        patch_urlopen = patch('urllib2.urlopen', Mock(side_effect=se))
+        patch_urlopen.start()
+        self.collector.collect()
+        patch_urlopen.stop()
+        self.collector.dimension_reader = CompositeDimensionReader()
+
+        expected_dims = dims['localhost']
+        actual_dims = self.collector.host_custom_dimensions
+        self.assertEqual(expected_dims, actual_dims)
 
     def test_should_escape_jolokia_domains(self):
         domain_with_slash = self.collector.escape_domain('some/domain')
@@ -160,8 +189,7 @@ class TestJolokiaCollector(CollectorTestCase):
             prefix + '.memoryUsageBeforeGc.Code_Cache.init': 2555904,
             prefix + '.memoryUsageBeforeGc.Code_Cache.used': 2600768,
             prefix + '.memoryUsageBeforeGc.Par_Survivor_Space.max': 3145728,
-            prefix + '.memoryUsageBeforeGc.Par_Survivor_Space.committed':
-            3145728,
+            prefix + '.memoryUsageBeforeGc.Par_Survivor_Space.committed': 3145728,
             prefix + '.memoryUsageBeforeGc.Par_Survivor_Space.init': 3145728,
             prefix + '.memoryUsageBeforeGc.Par_Survivor_Space.used': 414088
         }
@@ -188,6 +216,7 @@ class TestJolokiaCollector(CollectorTestCase):
             prefix + '.memUsedBeforeGc.Par_Survivor_Space.committed': 3145728,
             prefix + '.memUsedBeforeGc.Par_Survivor_Space.used': 414088
         }
+
 
 ################################################################################
 if __name__ == "__main__":

@@ -10,27 +10,31 @@ import (
 	"github.com/pkg/errors"
 )
 
-// HTTPGet retrieve content from the given http/https URL
-// Returns the response body, `Content-Type` header, and an error
-func HTTPGet(
-	url string,
-	headers map[string]string,
-	timeout int,
+type HTTPGetter interface {
+	Get(url string, headers map[string]string) ([]byte, string, error)
+}
+
+type httpGetterImpl struct {
+	client *http.Client
+}
+
+// NewHTTPGetter constructs a new HTTPGetter instance
+func NewHTTPGetter(
 	serverCaFile string,
 	clientCertFile string,
 	clientKeyFile string,
-) ([]byte, string, error) {
-
+	timeout int,
+) (HTTPGetter, error) {
 	var transport *http.Transport
 	if clientCertFile != "" && clientKeyFile != "" && serverCaFile != "" {
 		cert, err := tls.LoadX509KeyPair(clientCertFile, clientKeyFile)
 		if err != nil {
-			return nil, "", errors.Wrap(err, "Cannot load client credentials")
+			return nil, errors.Wrap(err, "Cannot load client credentials")
 		}
 
 		caCert, err := ioutil.ReadFile(serverCaFile)
 		if err != nil {
-			return nil, "", errors.Wrap(err, "Cannot load server CA")
+			return nil, errors.Wrap(err, "Cannot load server CA")
 		}
 
 		caCertPool := x509.NewCertPool()
@@ -50,6 +54,17 @@ func HTTPGet(
 		Transport: transport,
 	}
 
+	g := new(httpGetterImpl)
+	g.client = client
+	return g, nil
+}
+
+// Get retrieves content from the given http/https URL
+// Returns the response body, `Content-Type` header, and an error
+func (g *httpGetterImpl) Get(
+	url string,
+	headers map[string]string,
+) ([]byte, string, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, "", errors.Errorf("Error while creating a request for %s: %s", url, err)
@@ -58,7 +73,7 @@ func HTTPGet(
 		req.Header.Add(headerName, headerValue)
 	}
 
-	resp, err := client.Do(req)
+	resp, err := g.client.Do(req)
 	if err != nil {
 		return nil, "", errors.Wrap(err, "Error while executing the request")
 	}

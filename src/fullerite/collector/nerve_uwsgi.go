@@ -31,6 +31,7 @@ type nerveUWSGICollector struct {
 	queryPath             string
 	timeout               int
 	servicesWhitelist     []string
+	serviceHeadersMap     map[string]map[string]string
 	workersStatsEnabled   bool
 	workersStatsQueryPath string
 	workersStatsBlacklist []string
@@ -67,6 +68,28 @@ func (n *nerveUWSGICollector) Configure(configMap map[string]interface{}) {
 	}
 	if val, exists := configMap["servicesWhitelist"]; exists {
 		n.servicesWhitelist = config.GetAsSlice(val)
+	}
+
+	// All these loops and type casts are necessary because the map that we receive
+	// is just an interface and we cannot cast it directly to a nested map.
+	// serviceHeaders map example:
+	// "serviceHeaders": {
+	//     "yelp-main": {
+	//         "Host": "internalapi"
+	//     }
+	// }
+	n.serviceHeadersMap = make(map[string]map[string]string)
+	if serviceHeaders, exists := configMap["serviceHeaders"]; exists {
+		// For each service in the map, extract the headers
+		for service, headers := range serviceHeaders.(map[string]interface{}) {
+			// We cannot cast directly from map[string]interface{} to map[string]string
+			// so we need to create a new map and loop on the old to populate it.
+			headersMap := make(map[string]string)
+			for headerKey, headerVal := range headers.(map[string]interface{}) {
+				headersMap[headerKey] = headerVal.(string)
+			}
+			n.serviceHeadersMap[service] = headersMap
+		}
 	}
 	if val, exists := configMap["workersStatsBlacklist"]; exists {
 		n.workersStatsBlacklist = config.GetAsSlice(val)
@@ -110,7 +133,12 @@ func (n *nerveUWSGICollector) queryService(serviceName string, host string, port
 	serviceLog := n.log.WithField("service", serviceName)
 	endpoint := fmt.Sprintf("http://%s:%d/%s", host, port, n.queryPath)
 	serviceLog.Debug("making GET request to ", endpoint)
-	rawResponse, schemaVer, err := queryEndpoint(endpoint, n.timeout)
+	headers := make(map[string]string)
+	if val, exists := n.serviceHeadersMap[serviceName]; exists {
+		headers = val
+	}
+	serviceLog.Debug("GET request headers ", headers)
+	rawResponse, schemaVer, err := queryEndpoint(endpoint, headers, n.timeout)
 	if err != nil {
 		serviceLog.Warn("Failed to query endpoint ", endpoint, ": ", err)
 		return
@@ -155,13 +183,25 @@ func (n *nerveUWSGICollector) queryService(serviceName string, host string, port
 	}
 }
 
-func queryEndpoint(endpoint string, timeout int) ([]byte, string, error) {
+func queryEndpoint(endpoint string, headers map[string]string, timeout int) ([]byte, string, error) {
 	client := http.Client{
 		Timeout: time.Duration(timeout) * time.Second,
 	}
 
-	rsp, err := client.Get(endpoint)
+	req, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		return []byte{}, "", err
+	}
+	for key, val := range headers {
+		// Host is a special header and we cannot use Header.Add for it
+		if key == "Host" {
+			req.Host = val
+		} else {
+			req.Header.Add(key, val)
+		}
+	}
 
+	rsp, err := client.Do(req)
 	if rsp != nil {
 		defer func() {
 			io.Copy(ioutil.Discard, rsp.Body)
@@ -218,7 +258,12 @@ func (n *nerveUWSGICollector) tryFetchUWSGIWorkersStats(serviceName string, endp
 	emptyResult := []metric.Metric{}
 	serviceLog := n.log.WithField("service", serviceName)
 	serviceLog.Debug("making GET request to ", endpoint)
-	rawResponse, _, err := queryEndpoint(endpoint, n.timeout)
+	headers := make(map[string]string)
+	if val, exists := n.serviceHeadersMap[serviceName]; exists {
+		headers = val
+	}
+	serviceLog.Debug("GET request headers ", headers)
+	rawResponse, _, err := queryEndpoint(endpoint, headers, n.timeout)
 	if err != nil {
 		serviceLog.Info("Failed to query workers stats endpoint ", endpoint, ": ", err)
 		return emptyResult, err

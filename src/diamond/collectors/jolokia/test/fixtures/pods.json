@@ -1,0 +1,5124 @@
+{
+  "kind": "PodList",
+  "apiVersion": "v1",
+  "metadata": {},
+  "items": [
+    {
+      "metadata": {
+        "name": "cassandra-operator-main-5c4d59b64b-qgz9d",
+        "generateName": "cassandra-operator-main-5c4d59b64b-",
+        "namespace": "paasta",
+        "selfLink": "/api/v1/namespaces/paasta/pods/cassandra-operator-main-5c4d59b64b-qgz9d",
+        "uid": "dd51b147-43ca-4ef4-8238-16ea21dc1a9f",
+        "resourceVersion": "877006456",
+        "creationTimestamp": "2020-02-27T16:42:03Z",
+        "labels": {
+          "paasta.yelp.com/config_sha": "configd3674c51",
+          "paasta.yelp.com/git_sha": "471b8c7d9ba34a1658c7e2e18f9e56d4ca08391f",
+          "paasta.yelp.com/instance": "main",
+          "paasta.yelp.com/service": "cassandra-operator",
+          "pod-template-hash": "5c4d59b64b",
+          "yelp.com/paasta_config_sha": "configd3674c51",
+          "yelp.com/paasta_git_sha": "471b8c7d9ba34a1658c7e2e18f9e56d4ca08391f",
+          "yelp.com/paasta_instance": "main",
+          "yelp.com/paasta_service": "cassandra-operator"
+        },
+        "annotations": {
+          "iam.amazonaws.com/role": "",
+          "kubernetes.io/config.seen": "2020-02-28T05:17:54.218374376-08:00",
+          "kubernetes.io/config.source": "api",
+          "paasta.yelp.com/routable_ip": "false",
+          "smartstack_registrations": "[\"cassandra-operator.main\"]"
+        },
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "kind": "ReplicaSet",
+            "name": "cassandra-operator-main-5c4d59b64b",
+            "uid": "f6bbb141-1f98-4d58-8677-c0fa4282b69a",
+            "controller": true,
+            "blockOwnerDeletion": true
+          }
+        ]
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "host--slash-etcslash-boto--cfg",
+            "hostPath": {
+              "path": "/etc/boto_cfg",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-etcslash-paasta",
+            "hostPath": {
+              "path": "/etc/paasta",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-bulkdata",
+            "hostPath": {
+              "path": "/nail/bulkdata",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-datacenter",
+            "hostPath": {
+              "path": "/nail/etc/datacenter",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-ecosystem",
+            "hostPath": {
+              "path": "/nail/etc/ecosystem",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-habitat",
+            "hostPath": {
+              "path": "/nail/etc/habitat",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-kafka--discovery",
+            "hostPath": {
+              "path": "/nail/etc/kafka_discovery/",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-mrjob",
+            "hostPath": {
+              "path": "/nail/etc/mrjob",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-region",
+            "hostPath": {
+              "path": "/nail/etc/region",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-runtimeenv",
+            "hostPath": {
+              "path": "/nail/etc/runtimeenv",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-services",
+            "hostPath": {
+              "path": "/nail/etc/services",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-srv-configs",
+            "hostPath": {
+              "path": "/nail/etc/srv-configs",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-superregion",
+            "hostPath": {
+              "path": "/nail/etc/superregion",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-vaultslash-all--cas",
+            "hostPath": {
+              "path": "/nail/etc/vault/all_cas",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-zookeeper--discovery",
+            "hostPath": {
+              "path": "/nail/etc/zookeeper_discovery/",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-srv",
+            "hostPath": {
+              "path": "/nail/srv",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-varslash-runslash-synapseslash-services",
+            "hostPath": {
+              "path": "/var/run/synapse/services/",
+              "type": ""
+            }
+          },
+          {
+            "name": "cassandra-operator-token-psff2",
+            "secret": {
+              "secretName": "cassandra-operator-token-psff2",
+              "defaultMode": 420
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "main",
+            "image": "docker-paasta.yelpcorp.com:443/services-cassandra-operator:paasta-471b8c7d9ba34a1658c7e2e18f9e56d4ca08391f",
+            "ports": [
+              {
+                "containerPort": 8888,
+                "protocol": "TCP"
+              }
+            ],
+            "env": [
+              {
+                "name": "PAASTA_SERVICE",
+                "value": "cassandra-operator"
+              },
+              {
+                "name": "PAASTA_INSTANCE",
+                "value": "main"
+              },
+              {
+                "name": "PAASTA_CLUSTER",
+                "value": "infrastage"
+              },
+              {
+                "name": "PAASTA_DEPLOY_GROUP",
+                "value": "infrastage"
+              },
+              {
+                "name": "PAASTA_DOCKER_IMAGE",
+                "value": "services-cassandra-operator:paasta-471b8c7d9ba34a1658c7e2e18f9e56d4ca08391f"
+              },
+              {
+                "name": "PAASTA_RESOURCE_CPUS",
+                "value": "0.1"
+              },
+              {
+                "name": "PAASTA_RESOURCE_MEM",
+                "value": "256"
+              },
+              {
+                "name": "PAASTA_RESOURCE_DISK",
+                "value": "1024"
+              },
+              {
+                "name": "PAASTA_GIT_SHA",
+                "value": "471b8c7d"
+              },
+              {
+                "name": "PAASTA_MONITORING_TEAM",
+                "value": "dre_cassandra_k8s"
+              },
+              {
+                "name": "PAASTA_INSTANCE_TYPE",
+                "value": "kubernetes"
+              },
+              {
+                "name": "WATCH_NAMESPACE",
+                "value": "paasta-cassandraclusters"
+              },
+              {
+                "name": "OPERATOR_NAME",
+                "value": "cassandra-operator"
+              },
+              {
+                "name": "PAASTA_PORT",
+                "value": "8888"
+              },
+              {
+                "name": "PAASTA_POD_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              },
+              {
+                "name": "POD_NAME",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.name"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_HOST",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "spec.nodeName"
+                  }
+                }
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "1100m",
+                "ephemeral-storage": "1Gi",
+                "memory": "256Mi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "ephemeral-storage": "1Gi",
+                "memory": "256Mi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "host--slash-etcslash-boto--cfg",
+                "readOnly": true,
+                "mountPath": "/etc/boto_cfg"
+              },
+              {
+                "name": "host--slash-etcslash-paasta",
+                "readOnly": true,
+                "mountPath": "/etc/paasta"
+              },
+              {
+                "name": "host--slash-nailslash-bulkdata",
+                "readOnly": true,
+                "mountPath": "/nail/bulkdata"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-datacenter",
+                "readOnly": true,
+                "mountPath": "/nail/etc/datacenter"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-ecosystem",
+                "readOnly": true,
+                "mountPath": "/nail/etc/ecosystem"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-habitat",
+                "readOnly": true,
+                "mountPath": "/nail/etc/habitat"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-kafka--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/kafka_discovery/"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-mrjob",
+                "readOnly": true,
+                "mountPath": "/nail/etc/mrjob"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-region",
+                "readOnly": true,
+                "mountPath": "/nail/etc/region"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-runtimeenv",
+                "readOnly": true,
+                "mountPath": "/nail/etc/runtimeenv"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-services",
+                "readOnly": true,
+                "mountPath": "/nail/etc/services"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-srv-configs",
+                "readOnly": true,
+                "mountPath": "/nail/etc/srv-configs"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-superregion",
+                "readOnly": true,
+                "mountPath": "/nail/etc/superregion"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-vaultslash-all--cas",
+                "readOnly": true,
+                "mountPath": "/nail/etc/vault/all_cas"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-zookeeper--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/zookeeper_discovery/"
+              },
+              {
+                "name": "host--slash-nailslash-srv",
+                "readOnly": true,
+                "mountPath": "/nail/srv"
+              },
+              {
+                "name": "host--slash-varslash-runslash-synapseslash-services",
+                "readOnly": true,
+                "mountPath": "/var/run/synapse/services/"
+              },
+              {
+                "name": "cassandra-operator-token-psff2",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "lifecycle": {
+              "preStop": {
+                "exec": {
+                  "command": [
+                    "/bin/sh",
+                    "-c",
+                    "sleep 30"
+                  ]
+                }
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "IfNotPresent"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "nodeSelector": {
+          "yelp.com/pool": "default"
+        },
+        "serviceAccountName": "cassandra-operator",
+        "serviceAccount": "cassandra-operator",
+        "nodeName": "ip-10-40-19-94.us-west-1.compute.internal",
+        "shareProcessNamespace": true,
+        "securityContext": {},
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          }
+        ],
+        "priority": 0,
+        "enableServiceLinks": true
+      },
+      "status": {
+        "phase": "Running",
+        "conditions": [
+          {
+            "type": "Initialized",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-27T16:42:03Z"
+          },
+          {
+            "type": "Ready",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-27T16:42:11Z"
+          },
+          {
+            "type": "ContainersReady",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-27T16:42:11Z"
+          },
+          {
+            "type": "PodScheduled",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-27T16:42:03Z"
+          }
+        ],
+        "hostIP": "10.40.19.94",
+        "podIP": "172.23.0.43",
+        "podIPs": [
+          {
+            "ip": "172.23.0.43"
+          }
+        ],
+        "startTime": "2020-02-27T16:42:03Z",
+        "containerStatuses": [
+          {
+            "name": "main",
+            "state": {
+              "running": {
+                "startedAt": "2020-02-27T16:42:11Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "docker-paasta.yelpcorp.com:443/services-cassandra-operator:paasta-471b8c7d9ba34a1658c7e2e18f9e56d4ca08391f",
+            "imageID": "docker-pullable://docker-paasta.yelpcorp.com:443/services-cassandra-operator@sha256:b0a4dce28c30fccd081b31ddb8cc31662be9a7249b3d00d64db11e4f93fa2fb6",
+            "containerID": "docker://2e2c3f3df74b051c56d14ccd9bbd1215a2cfbd8e069630c510d93f925f3afb58",
+            "started": true
+          }
+        ],
+        "qosClass": "Burstable"
+      }
+    },
+    {
+      "metadata": {
+        "name": "kiam-agent-qm29l",
+        "generateName": "kiam-agent-",
+        "namespace": "kiam",
+        "selfLink": "/api/v1/namespaces/kiam/pods/kiam-agent-qm29l",
+        "uid": "53ecdc0d-ff2c-41ee-a63f-0382ab031792",
+        "resourceVersion": "837072240",
+        "creationTimestamp": "2020-01-29T12:28:01Z",
+        "labels": {
+          "app": "kiam",
+          "controller-revision-hash": "59b547749b",
+          "pod-template-generation": "8",
+          "role": "agent"
+        },
+        "annotations": {
+          "kubernetes.io/config.seen": "2020-02-28T05:17:54.21832882-08:00",
+          "kubernetes.io/config.source": "api"
+        },
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "kind": "DaemonSet",
+            "name": "kiam-agent",
+            "uid": "047134e6-f501-47fa-9d50-522d1bd5e38e",
+            "controller": true,
+            "blockOwnerDeletion": true
+          }
+        ]
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "xtables",
+            "hostPath": {
+              "path": "/run/xtables.lock",
+              "type": "FileOrCreate"
+            }
+          },
+          {
+            "name": "kiam-tls",
+            "hostPath": {
+              "path": "/etc/kubernetes/pki/kiam",
+              "type": "Directory"
+            }
+          },
+          {
+            "name": "ca-tls",
+            "hostPath": {
+              "path": "/etc/kubernetes/pki/ca.crt",
+              "type": "File"
+            }
+          },
+          {
+            "name": "default-token-gqwzp",
+            "secret": {
+              "secretName": "default-token-gqwzp",
+              "defaultMode": 420
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "kiam",
+            "image": "docker-paasta.yelpcorp.com:443/kiam:3.4-yelp1",
+            "command": [
+              "/kiam"
+            ],
+            "args": [
+              "agent",
+              "--iptables",
+              "--host-interface=!eth0",
+              "--level=debug",
+              "--port=8181",
+              "--cert=/etc/kubernetes/pki/kiam/kiam-client.crt",
+              "--key=/etc/kubernetes/pki/kiam/kiam-client.key",
+              "--ca=/etc/kubernetes/pki/ca.crt",
+              "--server-address=kiam-server:443",
+              "--gateway-timeout-creation=1s",
+              "--whitelist-route-regexp=.*"
+            ],
+            "env": [
+              {
+                "name": "HOST_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              },
+              {
+                "name": "AWS_METADATA_SERVICE_TIMEOUT",
+                "value": "5"
+              },
+              {
+                "name": "AWS_METADATA_SERVICE_NUM_ATTEMPTS",
+                "value": "20"
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "500m",
+                "ephemeral-storage": "100Mi",
+                "memory": "200Mi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "ephemeral-storage": "100Mi",
+                "memory": "100Mi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "xtables",
+                "mountPath": "/var/run/xtables.lock"
+              },
+              {
+                "name": "kiam-tls",
+                "mountPath": "/etc/kubernetes/pki/kiam"
+              },
+              {
+                "name": "ca-tls",
+                "mountPath": "/etc/kubernetes/pki/ca.crt"
+              },
+              {
+                "name": "default-token-gqwzp",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "livenessProbe": {
+              "httpGet": {
+                "path": "/health?deep=true",
+                "port": 8181,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 3,
+              "timeoutSeconds": 5,
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "failureThreshold": 3
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "Always",
+            "securityContext": {
+              "capabilities": {
+                "add": [
+                  "NET_ADMIN"
+                ]
+              }
+            }
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirstWithHostNet",
+        "serviceAccountName": "default",
+        "serviceAccount": "default",
+        "nodeName": "ip-10-40-19-94.us-west-1.compute.internal",
+        "hostNetwork": true,
+        "securityContext": {},
+        "affinity": {
+          "nodeAffinity": {
+            "requiredDuringSchedulingIgnoredDuringExecution": {
+              "nodeSelectorTerms": [
+                {
+                  "matchFields": [
+                    {
+                      "key": "metadata.name",
+                      "operator": "In",
+                      "values": [
+                        "ip-10-40-19-94.us-west-1.compute.internal"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute"
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute"
+          },
+          {
+            "key": "node.kubernetes.io/disk-pressure",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/memory-pressure",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/pid-pressure",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/unschedulable",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/network-unavailable",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          }
+        ],
+        "priorityClassName": "paasta-node-critical",
+        "priority": 1000000000,
+        "enableServiceLinks": true
+      },
+      "status": {
+        "phase": "Running",
+        "conditions": [
+          {
+            "type": "Initialized",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-01-29T12:28:01Z"
+          },
+          {
+            "type": "Ready",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-01-29T12:28:13Z"
+          },
+          {
+            "type": "ContainersReady",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-01-29T12:28:13Z"
+          },
+          {
+            "type": "PodScheduled",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-01-29T12:28:01Z"
+          }
+        ],
+        "hostIP": "10.40.19.94",
+        "podIP": "10.40.19.94",
+        "podIPs": [
+          {
+            "ip": "10.40.19.94"
+          }
+        ],
+        "startTime": "2020-01-29T12:28:01Z",
+        "containerStatuses": [
+          {
+            "name": "kiam",
+            "state": {
+              "running": {
+                "startedAt": "2020-02-24T14:59:20Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 5,
+            "image": "docker-paasta.yelpcorp.com:443/kiam:3.4-yelp1",
+            "imageID": "docker-pullable://docker-paasta.yelpcorp.com:443/kiam@sha256:ffb3b3894a5ba11c16311dcaa8f5aed062744b3fef5f8b61ecd2d70a41e1d329",
+            "containerID": "docker://75ba97a40426b66916148644dadace8e1856a81ab498da0b352a9c04f63eea7b",
+            "started": true
+          }
+        ],
+        "qosClass": "Burstable"
+      }
+    },
+    {
+      "metadata": {
+        "name": "kube-proxy-2bkmq",
+        "generateName": "kube-proxy-",
+        "namespace": "kube-system",
+        "selfLink": "/api/v1/namespaces/kube-system/pods/kube-proxy-2bkmq",
+        "uid": "5d15f006-796d-4ba4-8fdf-fbd39121503f",
+        "resourceVersion": "665627585",
+        "creationTimestamp": "2020-01-29T12:28:01Z",
+        "labels": {
+          "controller-revision-hash": "56ffd4ff47",
+          "k8s-app": "kube-proxy",
+          "pod-template-generation": "1"
+        },
+        "annotations": {
+          "kubernetes.io/config.seen": "2020-02-28T05:17:54.218319702-08:00",
+          "kubernetes.io/config.source": "api"
+        },
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "kind": "DaemonSet",
+            "name": "kube-proxy",
+            "uid": "1fb003c3-7a2e-4266-b03b-15bf099dba45",
+            "controller": true,
+            "blockOwnerDeletion": true
+          }
+        ]
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "kube-proxy",
+            "configMap": {
+              "name": "kube-proxy",
+              "defaultMode": 420
+            }
+          },
+          {
+            "name": "xtables-lock",
+            "hostPath": {
+              "path": "/run/xtables.lock",
+              "type": "FileOrCreate"
+            }
+          },
+          {
+            "name": "lib-modules",
+            "hostPath": {
+              "path": "/lib/modules",
+              "type": ""
+            }
+          },
+          {
+            "name": "kube-proxy-token-l7hsk",
+            "secret": {
+              "secretName": "kube-proxy-token-l7hsk",
+              "defaultMode": 420
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "kube-proxy",
+            "image": "k8s.gcr.io/kube-proxy:v1.16.2",
+            "command": [
+              "/usr/local/bin/kube-proxy",
+              "--config=/var/lib/kube-proxy/config.conf",
+              "--hostname-override=$(NODE_NAME)"
+            ],
+            "env": [
+              {
+                "name": "NODE_NAME",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "spec.nodeName"
+                  }
+                }
+              }
+            ],
+            "resources": {},
+            "volumeMounts": [
+              {
+                "name": "kube-proxy",
+                "mountPath": "/var/lib/kube-proxy"
+              },
+              {
+                "name": "xtables-lock",
+                "mountPath": "/run/xtables.lock"
+              },
+              {
+                "name": "lib-modules",
+                "readOnly": true,
+                "mountPath": "/lib/modules"
+              },
+              {
+                "name": "kube-proxy-token-l7hsk",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "IfNotPresent",
+            "securityContext": {
+              "privileged": true
+            }
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "nodeSelector": {
+          "beta.kubernetes.io/os": "linux"
+        },
+        "serviceAccountName": "kube-proxy",
+        "serviceAccount": "kube-proxy",
+        "nodeName": "ip-10-40-19-94.us-west-1.compute.internal",
+        "hostNetwork": true,
+        "securityContext": {},
+        "affinity": {
+          "nodeAffinity": {
+            "requiredDuringSchedulingIgnoredDuringExecution": {
+              "nodeSelectorTerms": [
+                {
+                  "matchFields": [
+                    {
+                      "key": "metadata.name",
+                      "operator": "In",
+                      "values": [
+                        "ip-10-40-19-94.us-west-1.compute.internal"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "CriticalAddonsOnly",
+            "operator": "Exists"
+          },
+          {
+            "operator": "Exists"
+          },
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute"
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute"
+          },
+          {
+            "key": "node.kubernetes.io/disk-pressure",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/memory-pressure",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/pid-pressure",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/unschedulable",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/network-unavailable",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          }
+        ],
+        "priorityClassName": "system-node-critical",
+        "priority": 2000001000,
+        "enableServiceLinks": true
+      },
+      "status": {
+        "phase": "Running",
+        "conditions": [
+          {
+            "type": "Initialized",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-01-29T12:28:01Z"
+          },
+          {
+            "type": "Ready",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-01-29T12:28:09Z"
+          },
+          {
+            "type": "ContainersReady",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-01-29T12:28:09Z"
+          },
+          {
+            "type": "PodScheduled",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-01-29T12:28:01Z"
+          }
+        ],
+        "hostIP": "10.40.19.94",
+        "podIP": "10.40.19.94",
+        "podIPs": [
+          {
+            "ip": "10.40.19.94"
+          }
+        ],
+        "startTime": "2020-01-29T12:28:01Z",
+        "containerStatuses": [
+          {
+            "name": "kube-proxy",
+            "state": {
+              "running": {
+                "startedAt": "2020-01-29T12:28:09Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "k8s.gcr.io/kube-proxy:v1.16.2",
+            "imageID": "docker-pullable://k8s.gcr.io/kube-proxy@sha256:dea8ba1d374a2e5bf0498d32a6fd32b6bf09d18f74db3758c641b54d7010a01f",
+            "containerID": "docker://d4e0944d37146eb6233a33c7d589c773780cb6f208700191fadf902b093d6294",
+            "started": true
+          }
+        ],
+        "qosClass": "BestEffort"
+      }
+    },
+    {
+      "metadata": {
+        "name": "coredns-5644d7b6d9-jlzg4",
+        "generateName": "coredns-5644d7b6d9-",
+        "namespace": "kube-system",
+        "selfLink": "/api/v1/namespaces/kube-system/pods/coredns-5644d7b6d9-jlzg4",
+        "uid": "a3199f2e-589a-41fc-9844-951563c5c579",
+        "resourceVersion": "792123368",
+        "creationTimestamp": "2020-01-29T15:49:03Z",
+        "labels": {
+          "k8s-app": "kube-dns",
+          "pod-template-hash": "5644d7b6d9"
+        },
+        "annotations": {
+          "kubernetes.io/config.seen": "2020-02-28T05:17:54.21830204-08:00",
+          "kubernetes.io/config.source": "api"
+        },
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "kind": "ReplicaSet",
+            "name": "coredns-5644d7b6d9",
+            "uid": "c489993f-65e1-417e-8dcc-ccc5a7cc4022",
+            "controller": true,
+            "blockOwnerDeletion": true
+          }
+        ]
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "config-volume",
+            "configMap": {
+              "name": "coredns",
+              "items": [
+                {
+                  "key": "Corefile",
+                  "path": "Corefile"
+                }
+              ],
+              "defaultMode": 420
+            }
+          },
+          {
+            "name": "coredns-token-5lz4v",
+            "secret": {
+              "secretName": "coredns-token-5lz4v",
+              "defaultMode": 420
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "coredns",
+            "image": "k8s.gcr.io/coredns:1.6.2",
+            "args": [
+              "-conf",
+              "/etc/coredns/Corefile"
+            ],
+            "ports": [
+              {
+                "name": "dns",
+                "containerPort": 53,
+                "protocol": "UDP"
+              },
+              {
+                "name": "dns-tcp",
+                "containerPort": 53,
+                "protocol": "TCP"
+              },
+              {
+                "name": "metrics",
+                "containerPort": 9153,
+                "protocol": "TCP"
+              }
+            ],
+            "resources": {
+              "limits": {
+                "memory": "170Mi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "memory": "70Mi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "config-volume",
+                "readOnly": true,
+                "mountPath": "/etc/coredns"
+              },
+              {
+                "name": "coredns-token-5lz4v",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "livenessProbe": {
+              "httpGet": {
+                "path": "/health",
+                "port": 8080,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 60,
+              "timeoutSeconds": 5,
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "failureThreshold": 5
+            },
+            "readinessProbe": {
+              "httpGet": {
+                "path": "/ready",
+                "port": 8181,
+                "scheme": "HTTP"
+              },
+              "timeoutSeconds": 1,
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "failureThreshold": 3
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "IfNotPresent",
+            "securityContext": {
+              "capabilities": {
+                "add": [
+                  "NET_BIND_SERVICE"
+                ],
+                "drop": [
+                  "all"
+                ]
+              },
+              "readOnlyRootFilesystem": true,
+              "allowPrivilegeEscalation": false
+            }
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "Default",
+        "nodeSelector": {
+          "beta.kubernetes.io/os": "linux"
+        },
+        "serviceAccountName": "coredns",
+        "serviceAccount": "coredns",
+        "nodeName": "ip-10-40-19-94.us-west-1.compute.internal",
+        "securityContext": {},
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "CriticalAddonsOnly",
+            "operator": "Exists"
+          },
+          {
+            "key": "node-role.kubernetes.io/master",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          }
+        ],
+        "priorityClassName": "system-cluster-critical",
+        "priority": 2000000000,
+        "enableServiceLinks": true
+      },
+      "status": {
+        "phase": "Running",
+        "conditions": [
+          {
+            "type": "Initialized",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-01-29T15:49:04Z"
+          },
+          {
+            "type": "Ready",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-28T13:18:02Z"
+          },
+          {
+            "type": "ContainersReady",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-28T13:18:02Z"
+          },
+          {
+            "type": "PodScheduled",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-01-29T15:49:03Z"
+          }
+        ],
+        "hostIP": "10.40.19.94",
+        "podIP": "10.93.122.9",
+        "podIPs": [
+          {
+            "ip": "10.93.122.9"
+          }
+        ],
+        "startTime": "2020-01-29T15:49:04Z",
+        "containerStatuses": [
+          {
+            "name": "coredns",
+            "state": {
+              "running": {
+                "startedAt": "2020-01-29T15:49:08Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "k8s.gcr.io/coredns:1.6.2",
+            "imageID": "docker-pullable://k8s.gcr.io/coredns@sha256:12eb885b8685b1b13a04ecf5c23bc809c2e57917252fd7b0be9e9c00644e8ee5",
+            "containerID": "docker://da6af329c70edb4216440dd8726e315f7b415ce3a06417c5a0ddf76a1295f6f9",
+            "started": true
+          }
+        ],
+        "qosClass": "Burstable"
+      }
+    },
+    {
+      "metadata": {
+        "name": "kubernetes-dashboard-7c54d59f66-gbmrq",
+        "generateName": "kubernetes-dashboard-7c54d59f66-",
+        "namespace": "kube-system",
+        "selfLink": "/api/v1/namespaces/kube-system/pods/kubernetes-dashboard-7c54d59f66-gbmrq",
+        "uid": "dc02d48d-6202-45e4-9043-299e9eeb02b9",
+        "resourceVersion": "665843597",
+        "creationTimestamp": "2020-01-29T15:49:24Z",
+        "labels": {
+          "k8s-app": "kubernetes-dashboard",
+          "pod-template-hash": "7c54d59f66"
+        },
+        "annotations": {
+          "kubernetes.io/config.seen": "2020-02-28T05:17:54.21835448-08:00",
+          "kubernetes.io/config.source": "api"
+        },
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "kind": "ReplicaSet",
+            "name": "kubernetes-dashboard-7c54d59f66",
+            "uid": "7cec7fd1-c5f0-4a88-a7bc-4d681b1af083",
+            "controller": true,
+            "blockOwnerDeletion": true
+          }
+        ]
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "kubernetes-dashboard-certs",
+            "secret": {
+              "secretName": "kubernetes-dashboard-certs",
+              "defaultMode": 420
+            }
+          },
+          {
+            "name": "tmp-volume",
+            "emptyDir": {}
+          },
+          {
+            "name": "kubernetes-dashboard-token-n2gxf",
+            "secret": {
+              "secretName": "kubernetes-dashboard-token-n2gxf",
+              "defaultMode": 420
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "kubernetes-dashboard",
+            "image": "k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1",
+            "args": [
+              "--auto-generate-certificates"
+            ],
+            "ports": [
+              {
+                "containerPort": 8443,
+                "protocol": "TCP"
+              }
+            ],
+            "resources": {},
+            "volumeMounts": [
+              {
+                "name": "kubernetes-dashboard-certs",
+                "mountPath": "/certs"
+              },
+              {
+                "name": "tmp-volume",
+                "mountPath": "/tmp"
+              },
+              {
+                "name": "kubernetes-dashboard-token-n2gxf",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "livenessProbe": {
+              "httpGet": {
+                "path": "/",
+                "port": 8443,
+                "scheme": "HTTPS"
+              },
+              "initialDelaySeconds": 30,
+              "timeoutSeconds": 30,
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "failureThreshold": 3
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "IfNotPresent"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "serviceAccountName": "kubernetes-dashboard",
+        "serviceAccount": "kubernetes-dashboard",
+        "nodeName": "ip-10-40-19-94.us-west-1.compute.internal",
+        "securityContext": {},
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "node-role.kubernetes.io/master",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          }
+        ],
+        "priority": 0,
+        "enableServiceLinks": true
+      },
+      "status": {
+        "phase": "Running",
+        "conditions": [
+          {
+            "type": "Initialized",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-01-29T15:49:24Z"
+          },
+          {
+            "type": "Ready",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-01-29T15:49:56Z"
+          },
+          {
+            "type": "ContainersReady",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-01-29T15:49:56Z"
+          },
+          {
+            "type": "PodScheduled",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-01-29T15:49:24Z"
+          }
+        ],
+        "hostIP": "10.40.19.94",
+        "podIP": "10.93.119.243",
+        "podIPs": [
+          {
+            "ip": "10.93.119.243"
+          }
+        ],
+        "startTime": "2020-01-29T15:49:24Z",
+        "containerStatuses": [
+          {
+            "name": "kubernetes-dashboard",
+            "state": {
+              "running": {
+                "startedAt": "2020-01-29T15:49:56Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1",
+            "imageID": "docker-pullable://k8s.gcr.io/kubernetes-dashboard-amd64@sha256:0ae6b69432e78069c5ce2bcde0fe409c5c4d6f0f4d9cd50a17974fea38898747",
+            "containerID": "docker://af99f6bc0d6f5d3fe7399166a064ad283742378e5a0fb0d303fd875f91ed831c",
+            "started": true
+          }
+        ],
+        "qosClass": "BestEffort"
+      }
+    },
+    {
+      "metadata": {
+        "name": "compute-infra-test-service-main--k8s-c98b649f9-xb8w2",
+        "generateName": "compute-infra-test-service-main--k8s-c98b649f9-",
+        "namespace": "paasta",
+        "selfLink": "/api/v1/namespaces/paasta/pods/compute-infra-test-service-main--k8s-c98b649f9-xb8w2",
+        "uid": "19e3497d-f79a-4e23-9faa-b8090c761943",
+        "resourceVersion": "876193212",
+        "creationTimestamp": "2020-02-27T00:49:03Z",
+        "labels": {
+          "paasta.yelp.com/config_sha": "config5f96c90f",
+          "paasta.yelp.com/git_sha": "41a908ac41851778a5ca95a379415b08fab8961c",
+          "paasta.yelp.com/instance": "main_k8s",
+          "paasta.yelp.com/service": "compute-infra-test-service",
+          "pod-template-hash": "c98b649f9",
+          "yelp.com/paasta_config_sha": "config5f96c90f",
+          "yelp.com/paasta_git_sha": "41a908ac41851778a5ca95a379415b08fab8961c",
+          "yelp.com/paasta_instance": "main_k8s",
+          "yelp.com/paasta_service": "compute-infra-test-service"
+        },
+        "annotations": {
+          "iam.amazonaws.com/role": "",
+          "kubernetes.io/config.seen": "2020-02-28T05:17:54.218292611-08:00",
+          "kubernetes.io/config.source": "api",
+          "paasta.yelp.com/routable_ip": "true",
+          "smartstack_registrations": "[\"compute-infra-test-service.main\"]"
+        },
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "kind": "ReplicaSet",
+            "name": "compute-infra-test-service-main--k8s-c98b649f9",
+            "uid": "e45faf5b-13d6-4e51-b310-0fe4fcfc49c6",
+            "controller": true,
+            "blockOwnerDeletion": true
+          }
+        ]
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "host--slash-etcslash-boto--cfg",
+            "hostPath": {
+              "path": "/etc/boto_cfg",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-bulkdata",
+            "hostPath": {
+              "path": "/nail/bulkdata",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-datacenter",
+            "hostPath": {
+              "path": "/nail/etc/datacenter",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-ecosystem",
+            "hostPath": {
+              "path": "/nail/etc/ecosystem",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-habitat",
+            "hostPath": {
+              "path": "/nail/etc/habitat",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-kafka--discovery",
+            "hostPath": {
+              "path": "/nail/etc/kafka_discovery/",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-mrjob",
+            "hostPath": {
+              "path": "/nail/etc/mrjob",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-region",
+            "hostPath": {
+              "path": "/nail/etc/region",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-runtimeenv",
+            "hostPath": {
+              "path": "/nail/etc/runtimeenv",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-services",
+            "hostPath": {
+              "path": "/nail/etc/services",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-srv-configs",
+            "hostPath": {
+              "path": "/nail/etc/srv-configs",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-superregion",
+            "hostPath": {
+              "path": "/nail/etc/superregion",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-zookeeper--discovery",
+            "hostPath": {
+              "path": "/nail/etc/zookeeper_discovery/",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-srv",
+            "hostPath": {
+              "path": "/nail/srv",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-varslash-runslash-synapseslash-services",
+            "hostPath": {
+              "path": "/var/run/synapse/services/",
+              "type": ""
+            }
+          },
+          {
+            "name": "default-token-7v76h",
+            "secret": {
+              "secretName": "default-token-7v76h",
+              "defaultMode": 420
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "main--k8s",
+            "image": "docker-paasta.yelpcorp.com:443/services-compute-infra-test-service:paasta-41a908ac41851778a5ca95a379415b08fab8961c",
+            "ports": [
+              {
+                "containerPort": 8888,
+                "protocol": "TCP"
+              }
+            ],
+            "env": [
+              {
+                "name": "PAASTA_SERVICE",
+                "value": "compute-infra-test-service"
+              },
+              {
+                "name": "PAASTA_INSTANCE",
+                "value": "main_k8s"
+              },
+              {
+                "name": "PAASTA_CLUSTER",
+                "value": "infrastage"
+              },
+              {
+                "name": "PAASTA_DEPLOY_GROUP",
+                "value": "mesosstage.k8s"
+              },
+              {
+                "name": "PAASTA_DOCKER_IMAGE",
+                "value": "services-compute-infra-test-service:paasta-41a908ac41851778a5ca95a379415b08fab8961c"
+              },
+              {
+                "name": "PAASTA_RESOURCE_CPUS",
+                "value": "0.1"
+              },
+              {
+                "name": "PAASTA_RESOURCE_MEM",
+                "value": "100"
+              },
+              {
+                "name": "PAASTA_RESOURCE_DISK",
+                "value": "1024"
+              },
+              {
+                "name": "PAASTA_GIT_SHA",
+                "value": "41a908ac"
+              },
+              {
+                "name": "PAASTA_MONITORING_TEAM",
+                "value": "compute_infra"
+              },
+              {
+                "name": "PAASTA_INSTANCE_TYPE",
+                "value": "kubernetes"
+              },
+              {
+                "name": "PAASTA_PORT",
+                "value": "8888"
+              },
+              {
+                "name": "PAASTA_POD_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              },
+              {
+                "name": "POD_NAME",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.name"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_HOST",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "spec.nodeName"
+                  }
+                }
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "1100m",
+                "ephemeral-storage": "1Gi",
+                "memory": "100Mi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "ephemeral-storage": "1Gi",
+                "memory": "100Mi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "host--slash-etcslash-boto--cfg",
+                "readOnly": true,
+                "mountPath": "/etc/boto_cfg"
+              },
+              {
+                "name": "host--slash-nailslash-bulkdata",
+                "readOnly": true,
+                "mountPath": "/nail/bulkdata"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-datacenter",
+                "readOnly": true,
+                "mountPath": "/nail/etc/datacenter"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-ecosystem",
+                "readOnly": true,
+                "mountPath": "/nail/etc/ecosystem"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-habitat",
+                "readOnly": true,
+                "mountPath": "/nail/etc/habitat"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-kafka--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/kafka_discovery/"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-mrjob",
+                "readOnly": true,
+                "mountPath": "/nail/etc/mrjob"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-region",
+                "readOnly": true,
+                "mountPath": "/nail/etc/region"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-runtimeenv",
+                "readOnly": true,
+                "mountPath": "/nail/etc/runtimeenv"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-services",
+                "readOnly": true,
+                "mountPath": "/nail/etc/services"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-srv-configs",
+                "readOnly": true,
+                "mountPath": "/nail/etc/srv-configs"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-superregion",
+                "readOnly": true,
+                "mountPath": "/nail/etc/superregion"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-zookeeper--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/zookeeper_discovery/"
+              },
+              {
+                "name": "host--slash-nailslash-srv",
+                "readOnly": true,
+                "mountPath": "/nail/srv"
+              },
+              {
+                "name": "host--slash-varslash-runslash-synapseslash-services",
+                "readOnly": true,
+                "mountPath": "/var/run/synapse/services/"
+              },
+              {
+                "name": "default-token-7v76h",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "livenessProbe": {
+              "httpGet": {
+                "path": "/status",
+                "port": 8888,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 60,
+              "timeoutSeconds": 10,
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "failureThreshold": 30
+            },
+            "lifecycle": {
+              "preStop": {
+                "exec": {
+                  "command": [
+                    "/bin/sh",
+                    "-c",
+                    "sleep 30"
+                  ]
+                }
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "IfNotPresent"
+          },
+          {
+            "name": "hacheck",
+            "image": "docker-paasta.yelpcorp.com:443/hacheck-k8s-sidecar",
+            "ports": [
+              {
+                "containerPort": 6666,
+                "protocol": "TCP"
+              }
+            ],
+            "env": [
+              {
+                "name": "PAASTA_POD_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              },
+              {
+                "name": "POD_NAME",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.name"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_HOST",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "spec.nodeName"
+                  }
+                }
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "100m",
+                "ephemeral-storage": "256Mi",
+                "memory": "1Gi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "ephemeral-storage": "256Mi",
+                "memory": "1Gi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "default-token-7v76h",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "readinessProbe": {
+              "exec": {
+                "command": [
+                  "/check_smartstack_up.sh",
+                  "8888",
+                  "compute-infra-test-service.main"
+                ]
+              },
+              "initialDelaySeconds": 10,
+              "timeoutSeconds": 1,
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "failureThreshold": 3
+            },
+            "lifecycle": {
+              "preStop": {
+                "exec": {
+                  "command": [
+                    "/bin/sh",
+                    "-c",
+                    "/usr/bin/hadown compute-infra-test-service.main; sleep 31"
+                  ]
+                }
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "Always"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "nodeSelector": {
+          "yelp.com/pool": "default"
+        },
+        "serviceAccountName": "default",
+        "serviceAccount": "default",
+        "nodeName": "ip-10-40-19-94.us-west-1.compute.internal",
+        "shareProcessNamespace": true,
+        "securityContext": {},
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          }
+        ],
+        "priority": 0,
+        "enableServiceLinks": true
+      },
+      "status": {
+        "phase": "Running",
+        "conditions": [
+          {
+            "type": "Initialized",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-27T00:49:03Z"
+          },
+          {
+            "type": "Ready",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-28T13:17:58Z"
+          },
+          {
+            "type": "ContainersReady",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-28T13:17:58Z"
+          },
+          {
+            "type": "PodScheduled",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-27T00:49:03Z"
+          }
+        ],
+        "hostIP": "10.40.19.94",
+        "podIP": "10.93.126.48",
+        "podIPs": [
+          {
+            "ip": "10.93.126.48"
+          }
+        ],
+        "startTime": "2020-02-27T00:49:03Z",
+        "containerStatuses": [
+          {
+            "name": "hacheck",
+            "state": {
+              "running": {
+                "startedAt": "2020-02-27T00:49:09Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "docker-paasta.yelpcorp.com:443/hacheck-k8s-sidecar:latest",
+            "imageID": "docker-pullable://docker-paasta.yelpcorp.com:443/hacheck-k8s-sidecar@sha256:15a5dfef37740e6c8d130faa389620b8d9f82f61fe177ce7d51f67be15a5166c",
+            "containerID": "docker://25090085b00ef523068155175c5fe0ecfb101cb23bd1f755c6716798ffb33398",
+            "started": true
+          },
+          {
+            "name": "main--k8s",
+            "state": {
+              "running": {
+                "startedAt": "2020-02-27T00:49:09Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "docker-paasta.yelpcorp.com:443/services-compute-infra-test-service:paasta-41a908ac41851778a5ca95a379415b08fab8961c",
+            "imageID": "docker-pullable://docker-paasta.yelpcorp.com:443/services-compute-infra-test-service@sha256:c218769c012261a772ca16d39bc6d1dc50d4bd625a2d63b82534d174cd62b59b",
+            "containerID": "docker://52e00a1ddafe27b3caeb8af0cc3be37b619a2dc294fef1ac71876902cc2acf6e",
+            "started": true
+          }
+        ],
+        "qosClass": "Burstable"
+      }
+    },
+    {
+      "metadata": {
+        "name": "flink-operator-main-dfc495688-8m6kp",
+        "generateName": "flink-operator-main-dfc495688-",
+        "namespace": "paasta",
+        "selfLink": "/api/v1/namespaces/paasta/pods/flink-operator-main-dfc495688-8m6kp",
+        "uid": "bb5d6e0a-735b-4a05-9865-174019846742",
+        "resourceVersion": "836358166",
+        "creationTimestamp": "2020-02-21T15:37:39Z",
+        "labels": {
+          "paasta.yelp.com/config_sha": "configc128276c",
+          "paasta.yelp.com/git_sha": "1fd8910ef74334a8df5ce47219859a217815204b",
+          "paasta.yelp.com/instance": "main",
+          "paasta.yelp.com/service": "flink-operator",
+          "pod-template-hash": "dfc495688",
+          "yelp.com/paasta_config_sha": "configc128276c",
+          "yelp.com/paasta_git_sha": "1fd8910ef74334a8df5ce47219859a217815204b",
+          "yelp.com/paasta_instance": "main",
+          "yelp.com/paasta_service": "flink-operator"
+        },
+        "annotations": {
+          "iam.amazonaws.com/role": "",
+          "kubernetes.io/config.seen": "2020-02-28T05:17:54.218310919-08:00",
+          "kubernetes.io/config.source": "api",
+          "paasta.yelp.com/routable_ip": "false",
+          "smartstack_registrations": "[\"flink-operator.main\"]"
+        },
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "kind": "ReplicaSet",
+            "name": "flink-operator-main-dfc495688",
+            "uid": "390ede91-82d0-42bd-bd2d-080d3864d63b",
+            "controller": true,
+            "blockOwnerDeletion": true
+          }
+        ]
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "host--slash-etcslash-boto--cfg",
+            "hostPath": {
+              "path": "/etc/boto_cfg",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-etcslash-paasta",
+            "hostPath": {
+              "path": "/etc/paasta",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-bulkdata",
+            "hostPath": {
+              "path": "/nail/bulkdata",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-datacenter",
+            "hostPath": {
+              "path": "/nail/etc/datacenter",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-ecosystem",
+            "hostPath": {
+              "path": "/nail/etc/ecosystem",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-habitat",
+            "hostPath": {
+              "path": "/nail/etc/habitat",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-kafka--discovery",
+            "hostPath": {
+              "path": "/nail/etc/kafka_discovery/",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-mrjob",
+            "hostPath": {
+              "path": "/nail/etc/mrjob",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-region",
+            "hostPath": {
+              "path": "/nail/etc/region",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-runtimeenv",
+            "hostPath": {
+              "path": "/nail/etc/runtimeenv",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-services",
+            "hostPath": {
+              "path": "/nail/etc/services",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-srv-configs",
+            "hostPath": {
+              "path": "/nail/etc/srv-configs",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-superregion",
+            "hostPath": {
+              "path": "/nail/etc/superregion",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-zookeeper--discovery",
+            "hostPath": {
+              "path": "/nail/etc/zookeeper_discovery/",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-srv",
+            "hostPath": {
+              "path": "/nail/srv",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-varslash-runslash-synapseslash-services",
+            "hostPath": {
+              "path": "/var/run/synapse/services/",
+              "type": ""
+            }
+          },
+          {
+            "name": "flink-operator-token-tbvdn",
+            "secret": {
+              "secretName": "flink-operator-token-tbvdn",
+              "defaultMode": 420
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "main",
+            "image": "docker-paasta.yelpcorp.com:443/services-flink-operator:paasta-1fd8910ef74334a8df5ce47219859a217815204b",
+            "command": [
+              "/usr/local/bin/flink-operator",
+              "--stderrthreshold=INFO",
+              "--logtostderr"
+            ],
+            "ports": [
+              {
+                "containerPort": 8888,
+                "protocol": "TCP"
+              }
+            ],
+            "env": [
+              {
+                "name": "PAASTA_SERVICE",
+                "value": "flink-operator"
+              },
+              {
+                "name": "PAASTA_INSTANCE",
+                "value": "main"
+              },
+              {
+                "name": "PAASTA_CLUSTER",
+                "value": "infrastage"
+              },
+              {
+                "name": "PAASTA_DEPLOY_GROUP",
+                "value": "infrastage"
+              },
+              {
+                "name": "PAASTA_DOCKER_IMAGE",
+                "value": "services-flink-operator:paasta-1fd8910ef74334a8df5ce47219859a217815204b"
+              },
+              {
+                "name": "PAASTA_RESOURCE_CPUS",
+                "value": "0.1"
+              },
+              {
+                "name": "PAASTA_RESOURCE_MEM",
+                "value": "256"
+              },
+              {
+                "name": "PAASTA_RESOURCE_DISK",
+                "value": "1024"
+              },
+              {
+                "name": "PAASTA_GIT_SHA",
+                "value": "1fd8910e"
+              },
+              {
+                "name": "PAASTA_MONITORING_TEAM",
+                "value": "stream-processing-flink"
+              },
+              {
+                "name": "PAASTA_INSTANCE_TYPE",
+                "value": "kubernetes"
+              },
+              {
+                "name": "WATCH_NAMESPACE",
+                "value": "paasta-flinks"
+              },
+              {
+                "name": "OPERATOR_NAME",
+                "value": "flink-operator"
+              },
+              {
+                "name": "PAASTA_PORT",
+                "value": "8888"
+              },
+              {
+                "name": "PAASTA_POD_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              },
+              {
+                "name": "POD_NAME",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.name"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_HOST",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "spec.nodeName"
+                  }
+                }
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "1100m",
+                "ephemeral-storage": "1Gi",
+                "memory": "256Mi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "ephemeral-storage": "1Gi",
+                "memory": "256Mi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "host--slash-etcslash-boto--cfg",
+                "readOnly": true,
+                "mountPath": "/etc/boto_cfg"
+              },
+              {
+                "name": "host--slash-etcslash-paasta",
+                "readOnly": true,
+                "mountPath": "/etc/paasta"
+              },
+              {
+                "name": "host--slash-nailslash-bulkdata",
+                "readOnly": true,
+                "mountPath": "/nail/bulkdata"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-datacenter",
+                "readOnly": true,
+                "mountPath": "/nail/etc/datacenter"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-ecosystem",
+                "readOnly": true,
+                "mountPath": "/nail/etc/ecosystem"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-habitat",
+                "readOnly": true,
+                "mountPath": "/nail/etc/habitat"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-kafka--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/kafka_discovery/"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-mrjob",
+                "readOnly": true,
+                "mountPath": "/nail/etc/mrjob"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-region",
+                "readOnly": true,
+                "mountPath": "/nail/etc/region"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-runtimeenv",
+                "readOnly": true,
+                "mountPath": "/nail/etc/runtimeenv"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-services",
+                "readOnly": true,
+                "mountPath": "/nail/etc/services"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-srv-configs",
+                "readOnly": true,
+                "mountPath": "/nail/etc/srv-configs"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-superregion",
+                "readOnly": true,
+                "mountPath": "/nail/etc/superregion"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-zookeeper--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/zookeeper_discovery/"
+              },
+              {
+                "name": "host--slash-nailslash-srv",
+                "readOnly": true,
+                "mountPath": "/nail/srv"
+              },
+              {
+                "name": "host--slash-varslash-runslash-synapseslash-services",
+                "readOnly": true,
+                "mountPath": "/var/run/synapse/services/"
+              },
+              {
+                "name": "flink-operator-token-tbvdn",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "lifecycle": {
+              "preStop": {
+                "exec": {
+                  "command": [
+                    "/bin/sh",
+                    "-c",
+                    "sleep 30"
+                  ]
+                }
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "IfNotPresent"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "nodeSelector": {
+          "yelp.com/pool": "default"
+        },
+        "serviceAccountName": "flink-operator",
+        "serviceAccount": "flink-operator",
+        "nodeName": "ip-10-40-19-94.us-west-1.compute.internal",
+        "shareProcessNamespace": true,
+        "securityContext": {},
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          }
+        ],
+        "priority": 0,
+        "enableServiceLinks": true
+      },
+      "status": {
+        "phase": "Running",
+        "conditions": [
+          {
+            "type": "Initialized",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-21T15:37:39Z"
+          },
+          {
+            "type": "Ready",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-24T14:05:36Z"
+          },
+          {
+            "type": "ContainersReady",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-24T14:05:36Z"
+          },
+          {
+            "type": "PodScheduled",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-21T15:37:39Z"
+          }
+        ],
+        "hostIP": "10.40.19.94",
+        "podIP": "172.23.0.37",
+        "podIPs": [
+          {
+            "ip": "172.23.0.37"
+          }
+        ],
+        "startTime": "2020-02-21T15:37:39Z",
+        "containerStatuses": [
+          {
+            "name": "main",
+            "state": {
+              "running": {
+                "startedAt": "2020-02-24T14:05:35Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 1,
+            "image": "docker-paasta.yelpcorp.com:443/services-flink-operator:paasta-1fd8910ef74334a8df5ce47219859a217815204b",
+            "imageID": "docker-pullable://docker-paasta.yelpcorp.com:443/services-flink-operator@sha256:9729347f7f3c2290d2dbc3908df7ed91dfbfae80e74cce58660bb49d3d873c39",
+            "containerID": "docker://08391efc6823fd0ee97a775f0a177ea7b92191476c5f5ad56a2f0b51d253d07d",
+            "started": true
+          }
+        ],
+        "qosClass": "Burstable"
+      }
+    },
+    {
+      "metadata": {
+        "name": "compute-infra-test-service-main--k8s-c98b649f9-4hltd",
+        "generateName": "compute-infra-test-service-main--k8s-c98b649f9-",
+        "namespace": "paasta",
+        "selfLink": "/api/v1/namespaces/paasta/pods/compute-infra-test-service-main--k8s-c98b649f9-4hltd",
+        "uid": "b76f1518-328c-4a97-b81a-f2486d059423",
+        "resourceVersion": "876193408",
+        "creationTimestamp": "2020-02-27T00:49:03Z",
+        "labels": {
+          "paasta.yelp.com/config_sha": "config5f96c90f",
+          "paasta.yelp.com/git_sha": "41a908ac41851778a5ca95a379415b08fab8961c",
+          "paasta.yelp.com/instance": "main_k8s",
+          "paasta.yelp.com/service": "compute-infra-test-service",
+          "pod-template-hash": "c98b649f9",
+          "yelp.com/paasta_config_sha": "config5f96c90f",
+          "yelp.com/paasta_git_sha": "41a908ac41851778a5ca95a379415b08fab8961c",
+          "yelp.com/paasta_instance": "main_k8s",
+          "yelp.com/paasta_service": "compute-infra-test-service"
+        },
+        "annotations": {
+          "iam.amazonaws.com/role": "",
+          "kubernetes.io/config.seen": "2020-02-28T05:17:54.21828277-08:00",
+          "kubernetes.io/config.source": "api",
+          "paasta.yelp.com/routable_ip": "true",
+          "smartstack_registrations": "[\"compute-infra-test-service.main\"]"
+        },
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "kind": "ReplicaSet",
+            "name": "compute-infra-test-service-main--k8s-c98b649f9",
+            "uid": "e45faf5b-13d6-4e51-b310-0fe4fcfc49c6",
+            "controller": true,
+            "blockOwnerDeletion": true
+          }
+        ]
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "host--slash-etcslash-boto--cfg",
+            "hostPath": {
+              "path": "/etc/boto_cfg",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-bulkdata",
+            "hostPath": {
+              "path": "/nail/bulkdata",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-datacenter",
+            "hostPath": {
+              "path": "/nail/etc/datacenter",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-ecosystem",
+            "hostPath": {
+              "path": "/nail/etc/ecosystem",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-habitat",
+            "hostPath": {
+              "path": "/nail/etc/habitat",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-kafka--discovery",
+            "hostPath": {
+              "path": "/nail/etc/kafka_discovery/",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-mrjob",
+            "hostPath": {
+              "path": "/nail/etc/mrjob",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-region",
+            "hostPath": {
+              "path": "/nail/etc/region",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-runtimeenv",
+            "hostPath": {
+              "path": "/nail/etc/runtimeenv",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-services",
+            "hostPath": {
+              "path": "/nail/etc/services",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-srv-configs",
+            "hostPath": {
+              "path": "/nail/etc/srv-configs",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-superregion",
+            "hostPath": {
+              "path": "/nail/etc/superregion",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-zookeeper--discovery",
+            "hostPath": {
+              "path": "/nail/etc/zookeeper_discovery/",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-srv",
+            "hostPath": {
+              "path": "/nail/srv",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-varslash-runslash-synapseslash-services",
+            "hostPath": {
+              "path": "/var/run/synapse/services/",
+              "type": ""
+            }
+          },
+          {
+            "name": "default-token-7v76h",
+            "secret": {
+              "secretName": "default-token-7v76h",
+              "defaultMode": 420
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "main--k8s",
+            "image": "docker-paasta.yelpcorp.com:443/services-compute-infra-test-service:paasta-41a908ac41851778a5ca95a379415b08fab8961c",
+            "ports": [
+              {
+                "containerPort": 8888,
+                "protocol": "TCP"
+              }
+            ],
+            "env": [
+              {
+                "name": "PAASTA_SERVICE",
+                "value": "compute-infra-test-service"
+              },
+              {
+                "name": "PAASTA_INSTANCE",
+                "value": "main_k8s"
+              },
+              {
+                "name": "PAASTA_CLUSTER",
+                "value": "infrastage"
+              },
+              {
+                "name": "PAASTA_DEPLOY_GROUP",
+                "value": "mesosstage.k8s"
+              },
+              {
+                "name": "PAASTA_DOCKER_IMAGE",
+                "value": "services-compute-infra-test-service:paasta-41a908ac41851778a5ca95a379415b08fab8961c"
+              },
+              {
+                "name": "PAASTA_RESOURCE_CPUS",
+                "value": "0.1"
+              },
+              {
+                "name": "PAASTA_RESOURCE_MEM",
+                "value": "100"
+              },
+              {
+                "name": "PAASTA_RESOURCE_DISK",
+                "value": "1024"
+              },
+              {
+                "name": "PAASTA_GIT_SHA",
+                "value": "41a908ac"
+              },
+              {
+                "name": "PAASTA_MONITORING_TEAM",
+                "value": "compute_infra"
+              },
+              {
+                "name": "PAASTA_INSTANCE_TYPE",
+                "value": "kubernetes"
+              },
+              {
+                "name": "PAASTA_PORT",
+                "value": "8888"
+              },
+              {
+                "name": "PAASTA_POD_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              },
+              {
+                "name": "POD_NAME",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.name"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_HOST",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "spec.nodeName"
+                  }
+                }
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "1100m",
+                "ephemeral-storage": "1Gi",
+                "memory": "100Mi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "ephemeral-storage": "1Gi",
+                "memory": "100Mi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "host--slash-etcslash-boto--cfg",
+                "readOnly": true,
+                "mountPath": "/etc/boto_cfg"
+              },
+              {
+                "name": "host--slash-nailslash-bulkdata",
+                "readOnly": true,
+                "mountPath": "/nail/bulkdata"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-datacenter",
+                "readOnly": true,
+                "mountPath": "/nail/etc/datacenter"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-ecosystem",
+                "readOnly": true,
+                "mountPath": "/nail/etc/ecosystem"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-habitat",
+                "readOnly": true,
+                "mountPath": "/nail/etc/habitat"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-kafka--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/kafka_discovery/"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-mrjob",
+                "readOnly": true,
+                "mountPath": "/nail/etc/mrjob"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-region",
+                "readOnly": true,
+                "mountPath": "/nail/etc/region"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-runtimeenv",
+                "readOnly": true,
+                "mountPath": "/nail/etc/runtimeenv"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-services",
+                "readOnly": true,
+                "mountPath": "/nail/etc/services"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-srv-configs",
+                "readOnly": true,
+                "mountPath": "/nail/etc/srv-configs"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-superregion",
+                "readOnly": true,
+                "mountPath": "/nail/etc/superregion"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-zookeeper--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/zookeeper_discovery/"
+              },
+              {
+                "name": "host--slash-nailslash-srv",
+                "readOnly": true,
+                "mountPath": "/nail/srv"
+              },
+              {
+                "name": "host--slash-varslash-runslash-synapseslash-services",
+                "readOnly": true,
+                "mountPath": "/var/run/synapse/services/"
+              },
+              {
+                "name": "default-token-7v76h",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "livenessProbe": {
+              "httpGet": {
+                "path": "/status",
+                "port": 8888,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 60,
+              "timeoutSeconds": 10,
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "failureThreshold": 30
+            },
+            "lifecycle": {
+              "preStop": {
+                "exec": {
+                  "command": [
+                    "/bin/sh",
+                    "-c",
+                    "sleep 30"
+                  ]
+                }
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "IfNotPresent"
+          },
+          {
+            "name": "hacheck",
+            "image": "docker-paasta.yelpcorp.com:443/hacheck-k8s-sidecar",
+            "ports": [
+              {
+                "containerPort": 6666,
+                "protocol": "TCP"
+              }
+            ],
+            "env": [
+              {
+                "name": "PAASTA_POD_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              },
+              {
+                "name": "POD_NAME",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.name"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_HOST",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "spec.nodeName"
+                  }
+                }
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "100m",
+                "ephemeral-storage": "256Mi",
+                "memory": "1Gi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "ephemeral-storage": "256Mi",
+                "memory": "1Gi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "default-token-7v76h",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "readinessProbe": {
+              "exec": {
+                "command": [
+                  "/check_smartstack_up.sh",
+                  "8888",
+                  "compute-infra-test-service.main"
+                ]
+              },
+              "initialDelaySeconds": 10,
+              "timeoutSeconds": 1,
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "failureThreshold": 3
+            },
+            "lifecycle": {
+              "preStop": {
+                "exec": {
+                  "command": [
+                    "/bin/sh",
+                    "-c",
+                    "/usr/bin/hadown compute-infra-test-service.main; sleep 31"
+                  ]
+                }
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "Always"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "nodeSelector": {
+          "yelp.com/pool": "default"
+        },
+        "serviceAccountName": "default",
+        "serviceAccount": "default",
+        "nodeName": "ip-10-40-19-94.us-west-1.compute.internal",
+        "shareProcessNamespace": true,
+        "securityContext": {},
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          }
+        ],
+        "priority": 0,
+        "enableServiceLinks": true
+      },
+      "status": {
+        "phase": "Running",
+        "conditions": [
+          {
+            "type": "Initialized",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-27T00:49:03Z"
+          },
+          {
+            "type": "Ready",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-28T13:18:04Z"
+          },
+          {
+            "type": "ContainersReady",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-28T13:18:04Z"
+          },
+          {
+            "type": "PodScheduled",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-27T00:49:03Z"
+          }
+        ],
+        "hostIP": "10.40.19.94",
+        "podIP": "10.93.117.64",
+        "podIPs": [
+          {
+            "ip": "10.93.117.64"
+          }
+        ],
+        "startTime": "2020-02-27T00:49:03Z",
+        "containerStatuses": [
+          {
+            "name": "hacheck",
+            "state": {
+              "running": {
+                "startedAt": "2020-02-27T00:49:09Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "docker-paasta.yelpcorp.com:443/hacheck-k8s-sidecar:latest",
+            "imageID": "docker-pullable://docker-paasta.yelpcorp.com:443/hacheck-k8s-sidecar@sha256:15a5dfef37740e6c8d130faa389620b8d9f82f61fe177ce7d51f67be15a5166c",
+            "containerID": "docker://293fb720ee2b7380b0d6922457e506b744a3bbf2cea46f5bebe9c3ac3871f88a",
+            "started": true
+          },
+          {
+            "name": "main--k8s",
+            "state": {
+              "running": {
+                "startedAt": "2020-02-27T00:49:09Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "docker-paasta.yelpcorp.com:443/services-compute-infra-test-service:paasta-41a908ac41851778a5ca95a379415b08fab8961c",
+            "imageID": "docker-pullable://docker-paasta.yelpcorp.com:443/services-compute-infra-test-service@sha256:c218769c012261a772ca16d39bc6d1dc50d4bd625a2d63b82534d174cd62b59b",
+            "containerID": "docker://9a48727aa3594406cc006c6c3efcbd4f0ea849025c211f743d0adb3b8afda8eb",
+            "started": true
+          }
+        ],
+        "qosClass": "Burstable"
+      }
+    },
+    {
+      "metadata": {
+        "name": "compute-infra-test-service-main--k8s-c98b649f9-c8t49",
+        "generateName": "compute-infra-test-service-main--k8s-c98b649f9-",
+        "namespace": "paasta",
+        "selfLink": "/api/v1/namespaces/paasta/pods/compute-infra-test-service-main--k8s-c98b649f9-c8t49",
+        "uid": "743b8653-a7ac-4086-85e9-e2bd7f06c345",
+        "resourceVersion": "876193331",
+        "creationTimestamp": "2020-02-27T00:49:03Z",
+        "labels": {
+          "paasta.yelp.com/config_sha": "config5f96c90f",
+          "paasta.yelp.com/git_sha": "41a908ac41851778a5ca95a379415b08fab8961c",
+          "paasta.yelp.com/instance": "main_k8s",
+          "paasta.yelp.com/service": "compute-infra-test-service",
+          "pod-template-hash": "c98b649f9",
+          "yelp.com/paasta_config_sha": "config5f96c90f",
+          "yelp.com/paasta_git_sha": "41a908ac41851778a5ca95a379415b08fab8961c",
+          "yelp.com/paasta_instance": "main_k8s",
+          "yelp.com/paasta_service": "compute-infra-test-service"
+        },
+        "annotations": {
+          "iam.amazonaws.com/role": "",
+          "kubernetes.io/config.seen": "2020-02-28T05:17:54.21836543-08:00",
+          "kubernetes.io/config.source": "api",
+          "paasta.yelp.com/routable_ip": "true",
+          "smartstack_registrations": "[\"compute-infra-test-service.main\"]"
+        },
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "kind": "ReplicaSet",
+            "name": "compute-infra-test-service-main--k8s-c98b649f9",
+            "uid": "e45faf5b-13d6-4e51-b310-0fe4fcfc49c6",
+            "controller": true,
+            "blockOwnerDeletion": true
+          }
+        ]
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "host--slash-etcslash-boto--cfg",
+            "hostPath": {
+              "path": "/etc/boto_cfg",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-bulkdata",
+            "hostPath": {
+              "path": "/nail/bulkdata",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-datacenter",
+            "hostPath": {
+              "path": "/nail/etc/datacenter",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-ecosystem",
+            "hostPath": {
+              "path": "/nail/etc/ecosystem",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-habitat",
+            "hostPath": {
+              "path": "/nail/etc/habitat",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-kafka--discovery",
+            "hostPath": {
+              "path": "/nail/etc/kafka_discovery/",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-mrjob",
+            "hostPath": {
+              "path": "/nail/etc/mrjob",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-region",
+            "hostPath": {
+              "path": "/nail/etc/region",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-runtimeenv",
+            "hostPath": {
+              "path": "/nail/etc/runtimeenv",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-services",
+            "hostPath": {
+              "path": "/nail/etc/services",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-srv-configs",
+            "hostPath": {
+              "path": "/nail/etc/srv-configs",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-superregion",
+            "hostPath": {
+              "path": "/nail/etc/superregion",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-zookeeper--discovery",
+            "hostPath": {
+              "path": "/nail/etc/zookeeper_discovery/",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-srv",
+            "hostPath": {
+              "path": "/nail/srv",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-varslash-runslash-synapseslash-services",
+            "hostPath": {
+              "path": "/var/run/synapse/services/",
+              "type": ""
+            }
+          },
+          {
+            "name": "default-token-7v76h",
+            "secret": {
+              "secretName": "default-token-7v76h",
+              "defaultMode": 420
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "main--k8s",
+            "image": "docker-paasta.yelpcorp.com:443/services-compute-infra-test-service:paasta-41a908ac41851778a5ca95a379415b08fab8961c",
+            "ports": [
+              {
+                "containerPort": 8888,
+                "protocol": "TCP"
+              }
+            ],
+            "env": [
+              {
+                "name": "PAASTA_SERVICE",
+                "value": "compute-infra-test-service"
+              },
+              {
+                "name": "PAASTA_INSTANCE",
+                "value": "main_k8s"
+              },
+              {
+                "name": "PAASTA_CLUSTER",
+                "value": "infrastage"
+              },
+              {
+                "name": "PAASTA_DEPLOY_GROUP",
+                "value": "mesosstage.k8s"
+              },
+              {
+                "name": "PAASTA_DOCKER_IMAGE",
+                "value": "services-compute-infra-test-service:paasta-41a908ac41851778a5ca95a379415b08fab8961c"
+              },
+              {
+                "name": "PAASTA_RESOURCE_CPUS",
+                "value": "0.1"
+              },
+              {
+                "name": "PAASTA_RESOURCE_MEM",
+                "value": "100"
+              },
+              {
+                "name": "PAASTA_RESOURCE_DISK",
+                "value": "1024"
+              },
+              {
+                "name": "PAASTA_GIT_SHA",
+                "value": "41a908ac"
+              },
+              {
+                "name": "PAASTA_MONITORING_TEAM",
+                "value": "compute_infra"
+              },
+              {
+                "name": "PAASTA_INSTANCE_TYPE",
+                "value": "kubernetes"
+              },
+              {
+                "name": "PAASTA_PORT",
+                "value": "8888"
+              },
+              {
+                "name": "PAASTA_POD_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              },
+              {
+                "name": "POD_NAME",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.name"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_HOST",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "spec.nodeName"
+                  }
+                }
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "1100m",
+                "ephemeral-storage": "1Gi",
+                "memory": "100Mi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "ephemeral-storage": "1Gi",
+                "memory": "100Mi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "host--slash-etcslash-boto--cfg",
+                "readOnly": true,
+                "mountPath": "/etc/boto_cfg"
+              },
+              {
+                "name": "host--slash-nailslash-bulkdata",
+                "readOnly": true,
+                "mountPath": "/nail/bulkdata"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-datacenter",
+                "readOnly": true,
+                "mountPath": "/nail/etc/datacenter"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-ecosystem",
+                "readOnly": true,
+                "mountPath": "/nail/etc/ecosystem"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-habitat",
+                "readOnly": true,
+                "mountPath": "/nail/etc/habitat"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-kafka--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/kafka_discovery/"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-mrjob",
+                "readOnly": true,
+                "mountPath": "/nail/etc/mrjob"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-region",
+                "readOnly": true,
+                "mountPath": "/nail/etc/region"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-runtimeenv",
+                "readOnly": true,
+                "mountPath": "/nail/etc/runtimeenv"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-services",
+                "readOnly": true,
+                "mountPath": "/nail/etc/services"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-srv-configs",
+                "readOnly": true,
+                "mountPath": "/nail/etc/srv-configs"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-superregion",
+                "readOnly": true,
+                "mountPath": "/nail/etc/superregion"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-zookeeper--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/zookeeper_discovery/"
+              },
+              {
+                "name": "host--slash-nailslash-srv",
+                "readOnly": true,
+                "mountPath": "/nail/srv"
+              },
+              {
+                "name": "host--slash-varslash-runslash-synapseslash-services",
+                "readOnly": true,
+                "mountPath": "/var/run/synapse/services/"
+              },
+              {
+                "name": "default-token-7v76h",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "livenessProbe": {
+              "httpGet": {
+                "path": "/status",
+                "port": 8888,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 60,
+              "timeoutSeconds": 10,
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "failureThreshold": 30
+            },
+            "lifecycle": {
+              "preStop": {
+                "exec": {
+                  "command": [
+                    "/bin/sh",
+                    "-c",
+                    "sleep 30"
+                  ]
+                }
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "IfNotPresent"
+          },
+          {
+            "name": "hacheck",
+            "image": "docker-paasta.yelpcorp.com:443/hacheck-k8s-sidecar",
+            "ports": [
+              {
+                "containerPort": 6666,
+                "protocol": "TCP"
+              }
+            ],
+            "env": [
+              {
+                "name": "PAASTA_POD_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              },
+              {
+                "name": "POD_NAME",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.name"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_HOST",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "spec.nodeName"
+                  }
+                }
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "100m",
+                "ephemeral-storage": "256Mi",
+                "memory": "1Gi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "ephemeral-storage": "256Mi",
+                "memory": "1Gi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "default-token-7v76h",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "readinessProbe": {
+              "exec": {
+                "command": [
+                  "/check_smartstack_up.sh",
+                  "8888",
+                  "compute-infra-test-service.main"
+                ]
+              },
+              "initialDelaySeconds": 10,
+              "timeoutSeconds": 1,
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "failureThreshold": 3
+            },
+            "lifecycle": {
+              "preStop": {
+                "exec": {
+                  "command": [
+                    "/bin/sh",
+                    "-c",
+                    "/usr/bin/hadown compute-infra-test-service.main; sleep 31"
+                  ]
+                }
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "Always"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "nodeSelector": {
+          "yelp.com/pool": "default"
+        },
+        "serviceAccountName": "default",
+        "serviceAccount": "default",
+        "nodeName": "ip-10-40-19-94.us-west-1.compute.internal",
+        "shareProcessNamespace": true,
+        "securityContext": {},
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          }
+        ],
+        "priority": 0,
+        "enableServiceLinks": true
+      },
+      "status": {
+        "phase": "Running",
+        "conditions": [
+          {
+            "type": "Initialized",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-27T00:49:03Z"
+          },
+          {
+            "type": "Ready",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-28T13:17:58Z"
+          },
+          {
+            "type": "ContainersReady",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-28T13:17:58Z"
+          },
+          {
+            "type": "PodScheduled",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-27T00:49:03Z"
+          }
+        ],
+        "hostIP": "10.40.19.94",
+        "podIP": "10.93.117.39",
+        "podIPs": [
+          {
+            "ip": "10.93.117.39"
+          }
+        ],
+        "startTime": "2020-02-27T00:49:03Z",
+        "containerStatuses": [
+          {
+            "name": "hacheck",
+            "state": {
+              "running": {
+                "startedAt": "2020-02-27T00:49:09Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "docker-paasta.yelpcorp.com:443/hacheck-k8s-sidecar:latest",
+            "imageID": "docker-pullable://docker-paasta.yelpcorp.com:443/hacheck-k8s-sidecar@sha256:15a5dfef37740e6c8d130faa389620b8d9f82f61fe177ce7d51f67be15a5166c",
+            "containerID": "docker://9de61362fa6c1b00f6fe50778ed7b98d200827d29d6cb7d6d926386bfd607afc",
+            "started": true
+          },
+          {
+            "name": "main--k8s",
+            "state": {
+              "running": {
+                "startedAt": "2020-02-27T00:49:09Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "docker-paasta.yelpcorp.com:443/services-compute-infra-test-service:paasta-41a908ac41851778a5ca95a379415b08fab8961c",
+            "imageID": "docker-pullable://docker-paasta.yelpcorp.com:443/services-compute-infra-test-service@sha256:c218769c012261a772ca16d39bc6d1dc50d4bd625a2d63b82534d174cd62b59b",
+            "containerID": "docker://57633f1adafd47fbaa5f315453ac8e296e03f2dfc547b576cfc5010ce1ac3a7f",
+            "started": true
+          }
+        ],
+        "qosClass": "Burstable"
+      }
+    },
+    {
+      "metadata": {
+        "name": "kafka-operator-main-75c7d8bbc8-rpjw6",
+        "generateName": "kafka-operator-main-75c7d8bbc8-",
+        "namespace": "paasta",
+        "selfLink": "/api/v1/namespaces/paasta/pods/kafka-operator-main-75c7d8bbc8-rpjw6",
+        "uid": "336c9a34-86b2-4880-af31-e94afcbc6d9c",
+        "resourceVersion": "876787639",
+        "creationTimestamp": "2020-02-27T12:25:03Z",
+        "labels": {
+          "paasta.yelp.com/config_sha": "config44e897f1",
+          "paasta.yelp.com/git_sha": "b8fb9df902599c499d73093fc6feceac99624801",
+          "paasta.yelp.com/instance": "main",
+          "paasta.yelp.com/service": "kafka-operator",
+          "pod-template-hash": "75c7d8bbc8",
+          "yelp.com/paasta_config_sha": "config44e897f1",
+          "yelp.com/paasta_git_sha": "b8fb9df902599c499d73093fc6feceac99624801",
+          "yelp.com/paasta_instance": "main",
+          "yelp.com/paasta_service": "kafka-operator"
+        },
+        "annotations": {
+          "iam.amazonaws.com/role": "",
+          "kubernetes.io/config.seen": "2020-02-28T05:17:54.218267858-08:00",
+          "kubernetes.io/config.source": "api",
+          "paasta.yelp.com/routable_ip": "false",
+          "smartstack_registrations": "[\"kafka-operator.main\"]"
+        },
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "kind": "ReplicaSet",
+            "name": "kafka-operator-main-75c7d8bbc8",
+            "uid": "e8b081b2-88f8-401b-baa3-ce016d7e28ba",
+            "controller": true,
+            "blockOwnerDeletion": true
+          }
+        ]
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "host--slash-etcslash-boto--cfg",
+            "hostPath": {
+              "path": "/etc/boto_cfg",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-etcslash-paasta",
+            "hostPath": {
+              "path": "/etc/paasta",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-bulkdata",
+            "hostPath": {
+              "path": "/nail/bulkdata",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-datacenter",
+            "hostPath": {
+              "path": "/nail/etc/datacenter",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-ecosystem",
+            "hostPath": {
+              "path": "/nail/etc/ecosystem",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-habitat",
+            "hostPath": {
+              "path": "/nail/etc/habitat",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-kafka--discovery",
+            "hostPath": {
+              "path": "/nail/etc/kafka_discovery/",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-mrjob",
+            "hostPath": {
+              "path": "/nail/etc/mrjob",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-region",
+            "hostPath": {
+              "path": "/nail/etc/region",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-runtimeenv",
+            "hostPath": {
+              "path": "/nail/etc/runtimeenv",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-services",
+            "hostPath": {
+              "path": "/nail/etc/services",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-srv-configs",
+            "hostPath": {
+              "path": "/nail/etc/srv-configs",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-superregion",
+            "hostPath": {
+              "path": "/nail/etc/superregion",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-etcslash-zookeeper--discovery",
+            "hostPath": {
+              "path": "/nail/etc/zookeeper_discovery/",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-nailslash-srv",
+            "hostPath": {
+              "path": "/nail/srv",
+              "type": ""
+            }
+          },
+          {
+            "name": "host--slash-varslash-runslash-synapseslash-services",
+            "hostPath": {
+              "path": "/var/run/synapse/services/",
+              "type": ""
+            }
+          },
+          {
+            "name": "kafka-operator-token-fssql",
+            "secret": {
+              "secretName": "kafka-operator-token-fssql",
+              "defaultMode": 420
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "main",
+            "image": "docker-paasta.yelpcorp.com:443/services-kafka-operator:paasta-b8fb9df902599c499d73093fc6feceac99624801",
+            "ports": [
+              {
+                "containerPort": 8888,
+                "protocol": "TCP"
+              }
+            ],
+            "env": [
+              {
+                "name": "PAASTA_SERVICE",
+                "value": "kafka-operator"
+              },
+              {
+                "name": "PAASTA_INSTANCE",
+                "value": "main"
+              },
+              {
+                "name": "PAASTA_CLUSTER",
+                "value": "infrastage"
+              },
+              {
+                "name": "PAASTA_DEPLOY_GROUP",
+                "value": "infrastage"
+              },
+              {
+                "name": "PAASTA_DOCKER_IMAGE",
+                "value": "services-kafka-operator:paasta-b8fb9df902599c499d73093fc6feceac99624801"
+              },
+              {
+                "name": "PAASTA_RESOURCE_CPUS",
+                "value": "1"
+              },
+              {
+                "name": "PAASTA_RESOURCE_MEM",
+                "value": "256"
+              },
+              {
+                "name": "PAASTA_RESOURCE_DISK",
+                "value": "1024"
+              },
+              {
+                "name": "PAASTA_GIT_SHA",
+                "value": "b8fb9df9"
+              },
+              {
+                "name": "PAASTA_MONITORING_TEAM",
+                "value": "distsys_streaming"
+              },
+              {
+                "name": "PAASTA_INSTANCE_TYPE",
+                "value": "kubernetes"
+              },
+              {
+                "name": "WATCH_NAMESPACE",
+                "value": "paasta-kafkaclusters"
+              },
+              {
+                "name": "OPERATOR_NAME",
+                "value": "kafka-operator"
+              },
+              {
+                "name": "USE_SYSLOG",
+                "value": "true"
+              },
+              {
+                "name": "ROUTE_53_ZONE_ID",
+                "value": "/hostedzone/Z06527681A2CC10R9IN84"
+              },
+              {
+                "name": "ROUTE_53_ZONE_NAME",
+                "value": "infrastage.paasta."
+              },
+              {
+                "name": "PAASTA_PORT",
+                "value": "8888"
+              },
+              {
+                "name": "PAASTA_POD_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              },
+              {
+                "name": "POD_NAME",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.name"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_HOST",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "spec.nodeName"
+                  }
+                }
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "2",
+                "ephemeral-storage": "1Gi",
+                "memory": "256Mi"
+              },
+              "requests": {
+                "cpu": "1",
+                "ephemeral-storage": "1Gi",
+                "memory": "256Mi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "host--slash-etcslash-boto--cfg",
+                "readOnly": true,
+                "mountPath": "/etc/boto_cfg"
+              },
+              {
+                "name": "host--slash-etcslash-paasta",
+                "readOnly": true,
+                "mountPath": "/etc/paasta"
+              },
+              {
+                "name": "host--slash-nailslash-bulkdata",
+                "readOnly": true,
+                "mountPath": "/nail/bulkdata"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-datacenter",
+                "readOnly": true,
+                "mountPath": "/nail/etc/datacenter"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-ecosystem",
+                "readOnly": true,
+                "mountPath": "/nail/etc/ecosystem"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-habitat",
+                "readOnly": true,
+                "mountPath": "/nail/etc/habitat"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-kafka--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/kafka_discovery/"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-mrjob",
+                "readOnly": true,
+                "mountPath": "/nail/etc/mrjob"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-region",
+                "readOnly": true,
+                "mountPath": "/nail/etc/region"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-runtimeenv",
+                "readOnly": true,
+                "mountPath": "/nail/etc/runtimeenv"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-services",
+                "readOnly": true,
+                "mountPath": "/nail/etc/services"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-srv-configs",
+                "readOnly": true,
+                "mountPath": "/nail/etc/srv-configs"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-superregion",
+                "readOnly": true,
+                "mountPath": "/nail/etc/superregion"
+              },
+              {
+                "name": "host--slash-nailslash-etcslash-zookeeper--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/zookeeper_discovery/"
+              },
+              {
+                "name": "host--slash-nailslash-srv",
+                "readOnly": true,
+                "mountPath": "/nail/srv"
+              },
+              {
+                "name": "host--slash-varslash-runslash-synapseslash-services",
+                "readOnly": true,
+                "mountPath": "/var/run/synapse/services/"
+              },
+              {
+                "name": "kafka-operator-token-fssql",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "lifecycle": {
+              "preStop": {
+                "exec": {
+                  "command": [
+                    "/bin/sh",
+                    "-c",
+                    "sleep 30"
+                  ]
+                }
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "IfNotPresent"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "nodeSelector": {
+          "yelp.com/pool": "default"
+        },
+        "serviceAccountName": "kafka-operator",
+        "serviceAccount": "kafka-operator",
+        "nodeName": "ip-10-40-19-94.us-west-1.compute.internal",
+        "shareProcessNamespace": true,
+        "securityContext": {},
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          }
+        ],
+        "priority": 0,
+        "enableServiceLinks": true
+      },
+      "status": {
+        "phase": "Running",
+        "conditions": [
+          {
+            "type": "Initialized",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-27T12:25:03Z"
+          },
+          {
+            "type": "Ready",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-27T12:25:23Z"
+          },
+          {
+            "type": "ContainersReady",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-27T12:25:23Z"
+          },
+          {
+            "type": "PodScheduled",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-27T12:25:03Z"
+          }
+        ],
+        "hostIP": "10.40.19.94",
+        "podIP": "172.23.0.42",
+        "podIPs": [
+          {
+            "ip": "172.23.0.42"
+          }
+        ],
+        "startTime": "2020-02-27T12:25:03Z",
+        "containerStatuses": [
+          {
+            "name": "main",
+            "state": {
+              "running": {
+                "startedAt": "2020-02-27T12:25:22Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "docker-paasta.yelpcorp.com:443/services-kafka-operator:paasta-b8fb9df902599c499d73093fc6feceac99624801",
+            "imageID": "docker-pullable://docker-paasta.yelpcorp.com:443/services-kafka-operator@sha256:596097b0a5ae9a7610376691debe99dffef562e61efa4548ffcdca829a3c7a52",
+            "containerID": "docker://232613f2ece7008c7439f08c94524d083139c0337ed297a78374ea733b952490",
+            "started": true
+          }
+        ],
+        "qosClass": "Burstable"
+      }
+    },
+    {
+      "metadata": {
+        "name": "kafka-k8s-testcluster-0",
+        "generateName": "kafka-k8s-testcluster-",
+        "namespace": "paasta-kafkaclusters",
+        "selfLink": "/api/v1/namespaces/paasta-kafkaclusters/pods/kafka-k8s-testcluster-0",
+        "uid": "c76bd6a2-02b3-4e63-ae81-aaec3e18d4fe",
+        "resourceVersion": "894084759",
+        "creationTimestamp": "2020-02-28T00:38:27Z",
+        "labels": {
+          "controller-revision-hash": "kafka-k8s-testcluster-64d9b86895",
+          "kafka.yelp.com/cluster": "test-medium-uswest1-devc",
+          "paasta.yelp.com/cluster": "infrastage",
+          "paasta.yelp.com/instance": "testcluster",
+          "paasta.yelp.com/service": "kafka-k8s",
+          "statefulset.kubernetes.io/pod-name": "kafka-k8s-testcluster-0",
+          "yelp.com/created_by": "kafka-operator",
+          "yelp.com/paasta_cluster": "infrastage",
+          "yelp.com/paasta_instance": "testcluster",
+          "yelp.com/paasta_service": "kafka-k8s"
+        },
+        "annotations": {
+          "iam.amazonaws.com/role": "kafka-kubernetes",
+          "kafka.yelp.com/podspec_hash": "2627244678",
+          "kubernetes.io/config.seen": "2020-02-28T05:17:54.218337899-08:00",
+          "kubernetes.io/config.source": "api",
+          "kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, ephemeral-storage, memory request for init container init; cpu, ephemeral-storage, memory limit for init container init",
+          "paasta.yelp.com/desired_state": "start",
+          "paasta.yelp.com/force_bounce": "",
+          "smartstack_registrations": "[\"kafka-k8s.testcluster\"]"
+        },
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "kind": "StatefulSet",
+            "name": "kafka-k8s-testcluster",
+            "uid": "d3975598-f5de-41ea-96d5-b849e82d846c",
+            "controller": true,
+            "blockOwnerDeletion": true
+          }
+        ]
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "pv-kafka-data-test-medium-uswest1-devc",
+            "persistentVolumeClaim": {
+              "claimName": "pv-kafka-data-test-medium-uswest1-devc-kafka-k8s-testcluster-0"
+            }
+          },
+          {
+            "name": "nail-etc-services",
+            "hostPath": {
+              "path": "/nail/etc/services",
+              "type": ""
+            }
+          },
+          {
+            "name": "nail-etc-habitat",
+            "hostPath": {
+              "path": "/nail/etc/habitat",
+              "type": ""
+            }
+          },
+          {
+            "name": "nail-etc-datacenter",
+            "hostPath": {
+              "path": "/nail/etc/datacenter",
+              "type": ""
+            }
+          },
+          {
+            "name": "nail-etc-ecosystem",
+            "hostPath": {
+              "path": "/nail/etc/ecosystem",
+              "type": ""
+            }
+          },
+          {
+            "name": "nail-etc-runtimeenv",
+            "hostPath": {
+              "path": "/nail/etc/runtimeenv",
+              "type": ""
+            }
+          },
+          {
+            "name": "nail-etc-region",
+            "hostPath": {
+              "path": "/nail/etc/region",
+              "type": ""
+            }
+          },
+          {
+            "name": "nail-etc-superregion",
+            "hostPath": {
+              "path": "/nail/etc/superregion",
+              "type": ""
+            }
+          },
+          {
+            "name": "nail-srv",
+            "hostPath": {
+              "path": "/nail/srv",
+              "type": ""
+            }
+          },
+          {
+            "name": "etc-boto--cfg",
+            "hostPath": {
+              "path": "/etc/boto_cfg",
+              "type": ""
+            }
+          },
+          {
+            "name": "var-run-synapse-services",
+            "hostPath": {
+              "path": "/var/run/synapse/services/",
+              "type": ""
+            }
+          },
+          {
+            "name": "nail-etc-zookeeper--discovery",
+            "hostPath": {
+              "path": "/nail/etc/zookeeper_discovery/",
+              "type": ""
+            }
+          },
+          {
+            "name": "nail-etc-kafka--discovery",
+            "hostPath": {
+              "path": "/nail/etc/kafka_discovery/",
+              "type": ""
+            }
+          },
+          {
+            "name": "nail-bulkdata",
+            "hostPath": {
+              "path": "/nail/bulkdata",
+              "type": ""
+            }
+          },
+          {
+            "name": "nail-etc-srv-configs",
+            "hostPath": {
+              "path": "/nail/etc/srv-configs",
+              "type": ""
+            }
+          },
+          {
+            "name": "nail-etc-mrjob",
+            "hostPath": {
+              "path": "/nail/etc/mrjob",
+              "type": ""
+            }
+          },
+          {
+            "name": "default-token-p86pz",
+            "secret": {
+              "secretName": "default-token-p86pz",
+              "defaultMode": 420
+            }
+          }
+        ],
+        "initContainers": [
+          {
+            "name": "init",
+            "image": "docker-paasta.yelpcorp.com:443/services-kafka-k8s:paasta-7376d422f7e475884340eeee36d5622e6a744166",
+            "command": [
+              "/bin/bash",
+              "/init-entrypoint.sh"
+            ],
+            "env": [
+              {
+                "name": "BROKER_RECORD_NAME_PATTERN",
+                "value": "kafka-$ID-test-medium-uswest1-devc.infrastage.paasta."
+              },
+              {
+                "name": "KAFKA_CLUSTER",
+                "value": "test-medium-uswest1-devc"
+              },
+              {
+                "name": "KAFKA_CLUSTER_NAME",
+                "value": "uswest1-devc"
+              },
+              {
+                "name": "KAFKA_CLUSTER_TYPE",
+                "value": "test-medium"
+              },
+              {
+                "name": "KAFKA_CONFIG_AUTO_CREATE_TOPICS_ENABLE",
+                "value": "true"
+              },
+              {
+                "name": "KAFKA_CONFIG_CONNECTIONS_MAX_IDLE_MS",
+                "value": "3600000"
+              },
+              {
+                "name": "KAFKA_CONFIG_DEFAULT_REPLICATION_FACTOR",
+                "value": "2"
+              },
+              {
+                "name": "KAFKA_CONFIG_DELETE_TOPIC_ENABLE",
+                "value": "true"
+              },
+              {
+                "name": "KAFKA_CONFIG_GROUP_MAX_SESSION_TIMEOUT_MS",
+                "value": "300000"
+              },
+              {
+                "name": "KAFKA_CONFIG_INTER_BROKER_PROTOCOL_VERSION",
+                "value": "1.1"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_CLEANER_DEDUPE_BUFFER_SIZE",
+                "value": "536870912"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_CLEANER_ENABLE",
+                "value": "true"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_CLEANER_THREADS",
+                "value": "3"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_MESSAGE_FORMAT_VERSION",
+                "value": "1.1"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_RETENTION_HOURS",
+                "value": "72"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_SEGMENT_BYTES",
+                "value": "268435456"
+              },
+              {
+                "name": "KAFKA_CONFIG_MESSAGE_MAX_BYTES",
+                "value": "1000000"
+              },
+              {
+                "name": "KAFKA_CONFIG_MIN_INSYNC_REPLICAS",
+                "value": "1"
+              },
+              {
+                "name": "KAFKA_CONFIG_NUM_IO_THREADS",
+                "value": "5"
+              },
+              {
+                "name": "KAFKA_CONFIG_NUM_REPLICA_FETCHERS",
+                "value": "3"
+              },
+              {
+                "name": "KAFKA_CONFIG_OFFSETS_LOAD_BUFFER_SIZE",
+                "value": "15728640"
+              },
+              {
+                "name": "KAFKA_CONFIG_OFFSETS_RETENTION_MINUTES",
+                "value": "8640"
+              },
+              {
+                "name": "KAFKA_CONFIG_OFFSETS_TOPIC_SEGMENT_BYTES",
+                "value": "104857600"
+              },
+              {
+                "name": "KAFKA_CONFIG_REPLICA_FETCH_MAX_BYTES",
+                "value": "10485760"
+              },
+              {
+                "name": "KAFKA_CONFIG_REQUEST_TIMEOUT_MS",
+                "value": "300001"
+              },
+              {
+                "name": "KAFKA_CONFIG_UNCLEAN_LEADER_ELECTION_ENABLE",
+                "value": "false"
+              },
+              {
+                "name": "PAASTA_CLUSTER",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.labels['paasta.yelp.com/cluster']"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_INSTANCE",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.labels['paasta.yelp.com/instance']"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_POD_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_SERVICE",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.labels['paasta.yelp.com/service']"
+                  }
+                }
+              },
+              {
+                "name": "ROUTE53_ZONE_ID",
+                "value": "/hostedzone/Z06527681A2CC10R9IN84"
+              },
+              {
+                "name": "KAFKA_CONFIG_ZOOKEEPER_CONNECT",
+                "value": "10.40.10.212,10.40.16.218,10.40.11.14/kafka-testcluster"
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "1",
+                "ephemeral-storage": "1Gi",
+                "memory": "1Gi"
+              },
+              "requests": {
+                "cpu": "1",
+                "ephemeral-storage": "1Gi",
+                "memory": "1Gi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "nail-etc-services",
+                "readOnly": true,
+                "mountPath": "/nail/etc/services"
+              },
+              {
+                "name": "nail-etc-habitat",
+                "readOnly": true,
+                "mountPath": "/nail/etc/habitat"
+              },
+              {
+                "name": "nail-etc-datacenter",
+                "readOnly": true,
+                "mountPath": "/nail/etc/datacenter"
+              },
+              {
+                "name": "nail-etc-ecosystem",
+                "readOnly": true,
+                "mountPath": "/nail/etc/ecosystem"
+              },
+              {
+                "name": "nail-etc-runtimeenv",
+                "readOnly": true,
+                "mountPath": "/nail/etc/runtimeenv"
+              },
+              {
+                "name": "nail-etc-region",
+                "readOnly": true,
+                "mountPath": "/nail/etc/region"
+              },
+              {
+                "name": "nail-etc-superregion",
+                "readOnly": true,
+                "mountPath": "/nail/etc/superregion"
+              },
+              {
+                "name": "nail-srv",
+                "readOnly": true,
+                "mountPath": "/nail/srv"
+              },
+              {
+                "name": "etc-boto--cfg",
+                "readOnly": true,
+                "mountPath": "/etc/boto_cfg"
+              },
+              {
+                "name": "var-run-synapse-services",
+                "readOnly": true,
+                "mountPath": "/var/run/synapse/services/"
+              },
+              {
+                "name": "nail-etc-zookeeper--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/zookeeper_discovery/"
+              },
+              {
+                "name": "nail-etc-kafka--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/kafka_discovery/"
+              },
+              {
+                "name": "nail-bulkdata",
+                "readOnly": true,
+                "mountPath": "/nail/bulkdata"
+              },
+              {
+                "name": "nail-etc-srv-configs",
+                "readOnly": true,
+                "mountPath": "/nail/etc/srv-configs"
+              },
+              {
+                "name": "nail-etc-mrjob",
+                "readOnly": true,
+                "mountPath": "/nail/etc/mrjob"
+              },
+              {
+                "name": "pv-kafka-data-test-medium-uswest1-devc",
+                "mountPath": "/nail/var/kafka"
+              },
+              {
+                "name": "default-token-p86pz",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "IfNotPresent"
+          }
+        ],
+        "containers": [
+          {
+            "name": "kafka-test-medium-uswest1-devc",
+            "image": "docker-paasta.yelpcorp.com:443/services-kafka-k8s:paasta-7376d422f7e475884340eeee36d5622e6a744166",
+            "ports": [
+              {
+                "name": "kafka",
+                "containerPort": 9092,
+                "protocol": "TCP"
+              },
+              {
+                "name": "jmx",
+                "containerPort": 8778,
+                "protocol": "TCP"
+              }
+            ],
+            "env": [
+              {
+                "name": "BROKER_RECORD_NAME_PATTERN",
+                "value": "kafka-$ID-test-medium-uswest1-devc.infrastage.paasta."
+              },
+              {
+                "name": "KAFKA_CLUSTER",
+                "value": "test-medium-uswest1-devc"
+              },
+              {
+                "name": "KAFKA_CLUSTER_NAME",
+                "value": "uswest1-devc"
+              },
+              {
+                "name": "KAFKA_CLUSTER_TYPE",
+                "value": "test-medium"
+              },
+              {
+                "name": "KAFKA_CONFIG_AUTO_CREATE_TOPICS_ENABLE",
+                "value": "true"
+              },
+              {
+                "name": "KAFKA_CONFIG_CONNECTIONS_MAX_IDLE_MS",
+                "value": "3600000"
+              },
+              {
+                "name": "KAFKA_CONFIG_DEFAULT_REPLICATION_FACTOR",
+                "value": "2"
+              },
+              {
+                "name": "KAFKA_CONFIG_DELETE_TOPIC_ENABLE",
+                "value": "true"
+              },
+              {
+                "name": "KAFKA_CONFIG_GROUP_MAX_SESSION_TIMEOUT_MS",
+                "value": "300000"
+              },
+              {
+                "name": "KAFKA_CONFIG_INTER_BROKER_PROTOCOL_VERSION",
+                "value": "1.1"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_CLEANER_DEDUPE_BUFFER_SIZE",
+                "value": "536870912"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_CLEANER_ENABLE",
+                "value": "true"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_CLEANER_THREADS",
+                "value": "3"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_MESSAGE_FORMAT_VERSION",
+                "value": "1.1"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_RETENTION_HOURS",
+                "value": "72"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_SEGMENT_BYTES",
+                "value": "268435456"
+              },
+              {
+                "name": "KAFKA_CONFIG_MESSAGE_MAX_BYTES",
+                "value": "1000000"
+              },
+              {
+                "name": "KAFKA_CONFIG_MIN_INSYNC_REPLICAS",
+                "value": "1"
+              },
+              {
+                "name": "KAFKA_CONFIG_NUM_IO_THREADS",
+                "value": "5"
+              },
+              {
+                "name": "KAFKA_CONFIG_NUM_REPLICA_FETCHERS",
+                "value": "3"
+              },
+              {
+                "name": "KAFKA_CONFIG_OFFSETS_LOAD_BUFFER_SIZE",
+                "value": "15728640"
+              },
+              {
+                "name": "KAFKA_CONFIG_OFFSETS_RETENTION_MINUTES",
+                "value": "8640"
+              },
+              {
+                "name": "KAFKA_CONFIG_OFFSETS_TOPIC_SEGMENT_BYTES",
+                "value": "104857600"
+              },
+              {
+                "name": "KAFKA_CONFIG_REPLICA_FETCH_MAX_BYTES",
+                "value": "10485760"
+              },
+              {
+                "name": "KAFKA_CONFIG_REQUEST_TIMEOUT_MS",
+                "value": "300001"
+              },
+              {
+                "name": "KAFKA_CONFIG_UNCLEAN_LEADER_ELECTION_ENABLE",
+                "value": "false"
+              },
+              {
+                "name": "PAASTA_CLUSTER",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.labels['paasta.yelp.com/cluster']"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_INSTANCE",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.labels['paasta.yelp.com/instance']"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_POD_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_SERVICE",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.labels['paasta.yelp.com/service']"
+                  }
+                }
+              },
+              {
+                "name": "ROUTE53_ZONE_ID",
+                "value": "/hostedzone/Z06527681A2CC10R9IN84"
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "4",
+                "ephemeral-storage": "2Gi",
+                "memory": "2Gi"
+              },
+              "requests": {
+                "cpu": "4",
+                "ephemeral-storage": "2Gi",
+                "memory": "2Gi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "nail-etc-services",
+                "readOnly": true,
+                "mountPath": "/nail/etc/services"
+              },
+              {
+                "name": "nail-etc-habitat",
+                "readOnly": true,
+                "mountPath": "/nail/etc/habitat"
+              },
+              {
+                "name": "nail-etc-datacenter",
+                "readOnly": true,
+                "mountPath": "/nail/etc/datacenter"
+              },
+              {
+                "name": "nail-etc-ecosystem",
+                "readOnly": true,
+                "mountPath": "/nail/etc/ecosystem"
+              },
+              {
+                "name": "nail-etc-runtimeenv",
+                "readOnly": true,
+                "mountPath": "/nail/etc/runtimeenv"
+              },
+              {
+                "name": "nail-etc-region",
+                "readOnly": true,
+                "mountPath": "/nail/etc/region"
+              },
+              {
+                "name": "nail-etc-superregion",
+                "readOnly": true,
+                "mountPath": "/nail/etc/superregion"
+              },
+              {
+                "name": "nail-srv",
+                "readOnly": true,
+                "mountPath": "/nail/srv"
+              },
+              {
+                "name": "etc-boto--cfg",
+                "readOnly": true,
+                "mountPath": "/etc/boto_cfg"
+              },
+              {
+                "name": "var-run-synapse-services",
+                "readOnly": true,
+                "mountPath": "/var/run/synapse/services/"
+              },
+              {
+                "name": "nail-etc-zookeeper--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/zookeeper_discovery/"
+              },
+              {
+                "name": "nail-etc-kafka--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/kafka_discovery/"
+              },
+              {
+                "name": "nail-bulkdata",
+                "readOnly": true,
+                "mountPath": "/nail/bulkdata"
+              },
+              {
+                "name": "nail-etc-srv-configs",
+                "readOnly": true,
+                "mountPath": "/nail/etc/srv-configs"
+              },
+              {
+                "name": "nail-etc-mrjob",
+                "readOnly": true,
+                "mountPath": "/nail/etc/mrjob"
+              },
+              {
+                "name": "pv-kafka-data-test-medium-uswest1-devc",
+                "mountPath": "/nail/var/kafka"
+              },
+              {
+                "name": "default-token-p86pz",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "livenessProbe": {
+              "exec": {
+                "command": [
+                  "sh",
+                  "-c",
+                  "/usr/bin/jps | /bin/grep -q SupportedKafka"
+                ]
+              },
+              "initialDelaySeconds": 90,
+              "timeoutSeconds": 10,
+              "periodSeconds": 30,
+              "successThreshold": 1,
+              "failureThreshold": 3
+            },
+            "readinessProbe": {
+              "tcpSocket": {
+                "port": 9092
+              },
+              "initialDelaySeconds": 10,
+              "timeoutSeconds": 1,
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "failureThreshold": 3
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "IfNotPresent",
+            "securityContext": {
+              "capabilities": {
+                "add": [
+                  "SYS_RESOURCE",
+                  "IPC_LOCK"
+                ]
+              }
+            }
+          },
+          {
+            "name": "hacheck",
+            "image": "docker-paasta.yelpcorp.com:443/hacheck-k8s-sidecar",
+            "ports": [
+              {
+                "containerPort": 6666,
+                "protocol": "TCP"
+              }
+            ],
+            "env": [
+              {
+                "name": "BROKER_RECORD_NAME_PATTERN",
+                "value": "kafka-$ID-test-medium-uswest1-devc.infrastage.paasta."
+              },
+              {
+                "name": "KAFKA_CLUSTER",
+                "value": "test-medium-uswest1-devc"
+              },
+              {
+                "name": "KAFKA_CLUSTER_NAME",
+                "value": "uswest1-devc"
+              },
+              {
+                "name": "KAFKA_CLUSTER_TYPE",
+                "value": "test-medium"
+              },
+              {
+                "name": "KAFKA_CONFIG_AUTO_CREATE_TOPICS_ENABLE",
+                "value": "true"
+              },
+              {
+                "name": "KAFKA_CONFIG_CONNECTIONS_MAX_IDLE_MS",
+                "value": "3600000"
+              },
+              {
+                "name": "KAFKA_CONFIG_DEFAULT_REPLICATION_FACTOR",
+                "value": "2"
+              },
+              {
+                "name": "KAFKA_CONFIG_DELETE_TOPIC_ENABLE",
+                "value": "true"
+              },
+              {
+                "name": "KAFKA_CONFIG_GROUP_MAX_SESSION_TIMEOUT_MS",
+                "value": "300000"
+              },
+              {
+                "name": "KAFKA_CONFIG_INTER_BROKER_PROTOCOL_VERSION",
+                "value": "1.1"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_CLEANER_DEDUPE_BUFFER_SIZE",
+                "value": "536870912"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_CLEANER_ENABLE",
+                "value": "true"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_CLEANER_THREADS",
+                "value": "3"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_MESSAGE_FORMAT_VERSION",
+                "value": "1.1"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_RETENTION_HOURS",
+                "value": "72"
+              },
+              {
+                "name": "KAFKA_CONFIG_LOG_SEGMENT_BYTES",
+                "value": "268435456"
+              },
+              {
+                "name": "KAFKA_CONFIG_MESSAGE_MAX_BYTES",
+                "value": "1000000"
+              },
+              {
+                "name": "KAFKA_CONFIG_MIN_INSYNC_REPLICAS",
+                "value": "1"
+              },
+              {
+                "name": "KAFKA_CONFIG_NUM_IO_THREADS",
+                "value": "5"
+              },
+              {
+                "name": "KAFKA_CONFIG_NUM_REPLICA_FETCHERS",
+                "value": "3"
+              },
+              {
+                "name": "KAFKA_CONFIG_OFFSETS_LOAD_BUFFER_SIZE",
+                "value": "15728640"
+              },
+              {
+                "name": "KAFKA_CONFIG_OFFSETS_RETENTION_MINUTES",
+                "value": "8640"
+              },
+              {
+                "name": "KAFKA_CONFIG_OFFSETS_TOPIC_SEGMENT_BYTES",
+                "value": "104857600"
+              },
+              {
+                "name": "KAFKA_CONFIG_REPLICA_FETCH_MAX_BYTES",
+                "value": "10485760"
+              },
+              {
+                "name": "KAFKA_CONFIG_REQUEST_TIMEOUT_MS",
+                "value": "300001"
+              },
+              {
+                "name": "KAFKA_CONFIG_UNCLEAN_LEADER_ELECTION_ENABLE",
+                "value": "false"
+              },
+              {
+                "name": "PAASTA_CLUSTER",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.labels['paasta.yelp.com/cluster']"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_INSTANCE",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.labels['paasta.yelp.com/instance']"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_POD_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              },
+              {
+                "name": "PAASTA_SERVICE",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.labels['paasta.yelp.com/service']"
+                  }
+                }
+              },
+              {
+                "name": "ROUTE53_ZONE_ID",
+                "value": "/hostedzone/Z06527681A2CC10R9IN84"
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "100m",
+                "ephemeral-storage": "1Gi",
+                "memory": "512Mi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "ephemeral-storage": "1Gi",
+                "memory": "512Mi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "nail-etc-services",
+                "readOnly": true,
+                "mountPath": "/nail/etc/services"
+              },
+              {
+                "name": "nail-etc-habitat",
+                "readOnly": true,
+                "mountPath": "/nail/etc/habitat"
+              },
+              {
+                "name": "nail-etc-datacenter",
+                "readOnly": true,
+                "mountPath": "/nail/etc/datacenter"
+              },
+              {
+                "name": "nail-etc-ecosystem",
+                "readOnly": true,
+                "mountPath": "/nail/etc/ecosystem"
+              },
+              {
+                "name": "nail-etc-runtimeenv",
+                "readOnly": true,
+                "mountPath": "/nail/etc/runtimeenv"
+              },
+              {
+                "name": "nail-etc-region",
+                "readOnly": true,
+                "mountPath": "/nail/etc/region"
+              },
+              {
+                "name": "nail-etc-superregion",
+                "readOnly": true,
+                "mountPath": "/nail/etc/superregion"
+              },
+              {
+                "name": "nail-srv",
+                "readOnly": true,
+                "mountPath": "/nail/srv"
+              },
+              {
+                "name": "etc-boto--cfg",
+                "readOnly": true,
+                "mountPath": "/etc/boto_cfg"
+              },
+              {
+                "name": "var-run-synapse-services",
+                "readOnly": true,
+                "mountPath": "/var/run/synapse/services/"
+              },
+              {
+                "name": "nail-etc-zookeeper--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/zookeeper_discovery/"
+              },
+              {
+                "name": "nail-etc-kafka--discovery",
+                "readOnly": true,
+                "mountPath": "/nail/etc/kafka_discovery/"
+              },
+              {
+                "name": "nail-bulkdata",
+                "readOnly": true,
+                "mountPath": "/nail/bulkdata"
+              },
+              {
+                "name": "nail-etc-srv-configs",
+                "readOnly": true,
+                "mountPath": "/nail/etc/srv-configs"
+              },
+              {
+                "name": "nail-etc-mrjob",
+                "readOnly": true,
+                "mountPath": "/nail/etc/mrjob"
+              },
+              {
+                "name": "pv-kafka-data-test-medium-uswest1-devc",
+                "mountPath": "/nail/var/kafka"
+              },
+              {
+                "name": "default-token-p86pz",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "readinessProbe": {
+              "exec": {
+                "command": [
+                  "/check_smartstack_up.sh",
+                  "9092",
+                  "kafka-k8s.testcluster"
+                ]
+              },
+              "initialDelaySeconds": 30,
+              "timeoutSeconds": 10,
+              "periodSeconds": 5,
+              "successThreshold": 1,
+              "failureThreshold": 10
+            },
+            "lifecycle": {
+              "preStop": {
+                "exec": {
+                  "command": [
+                    "/bin/sh",
+                    "-c",
+                    "/usr/bin/hadown kafka-k8s.testcluster"
+                  ]
+                }
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "Always"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "serviceAccountName": "default",
+        "serviceAccount": "default",
+        "nodeName": "ip-10-40-19-94.us-west-1.compute.internal",
+        "securityContext": {},
+        "hostname": "kafka-k8s-testcluster-0",
+        "subdomain": "kafka-test-medium-uswest1-devc",
+        "affinity": {
+          "podAntiAffinity": {
+            "requiredDuringSchedulingIgnoredDuringExecution": [
+              {
+                "labelSelector": {
+                  "matchLabels": {
+                    "kafka.yelp.com/cluster": "test-medium-uswest1-devc",
+                    "paasta.yelp.com/cluster": "infrastage",
+                    "paasta.yelp.com/instance": "testcluster",
+                    "paasta.yelp.com/service": "kafka-k8s",
+                    "yelp.com/created_by": "kafka-operator",
+                    "yelp.com/paasta_cluster": "infrastage",
+                    "yelp.com/paasta_instance": "testcluster",
+                    "yelp.com/paasta_service": "kafka-k8s"
+                  }
+                },
+                "namespaces": [
+                  "paasta-kafkaclusters"
+                ],
+                "topologyKey": "kubernetes.io/hostname"
+              }
+            ]
+          }
+        },
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          }
+        ],
+        "priority": 0,
+        "enableServiceLinks": true
+      },
+      "status": {
+        "phase": "Running",
+        "conditions": [
+          {
+            "type": "Initialized",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-28T13:10:20Z"
+          },
+          {
+            "type": "Ready",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-28T13:17:59Z"
+          },
+          {
+            "type": "ContainersReady",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-28T13:17:59Z"
+          },
+          {
+            "type": "PodScheduled",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-02-28T00:38:27Z"
+          }
+        ],
+        "hostIP": "10.40.19.94",
+        "podIP": "10.93.118.64",
+        "podIPs": [
+          {
+            "ip": "10.93.118.64"
+          }
+        ],
+        "startTime": "2020-02-28T00:38:27Z",
+        "initContainerStatuses": [
+          {
+            "name": "init",
+            "state": {
+              "terminated": {
+                "exitCode": 0,
+                "reason": "Completed",
+                "startedAt": "2020-02-28T13:10:18Z",
+                "finishedAt": "2020-02-28T13:10:20Z",
+                "containerID": "docker://c90eb7d40434ad4fb90cc4d191eca826f6b37b318a0a854a774fd7f61d6ab81d"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "docker-paasta.yelpcorp.com:443/services-kafka-k8s:paasta-7376d422f7e475884340eeee36d5622e6a744166",
+            "imageID": "docker-pullable://docker-paasta.yelpcorp.com:443/services-kafka-k8s@sha256:7d42543540d49b42ac49efab9980801ec791466cd1c3886a973d3e8b1c57c6d6",
+            "containerID": "docker://c90eb7d40434ad4fb90cc4d191eca826f6b37b318a0a854a774fd7f61d6ab81d"
+          }
+        ],
+        "containerStatuses": [
+          {
+            "name": "hacheck",
+            "state": {
+              "running": {
+                "startedAt": "2020-02-28T00:38:49Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "docker-paasta.yelpcorp.com:443/hacheck-k8s-sidecar:latest",
+            "imageID": "docker-pullable://docker-paasta.yelpcorp.com:443/hacheck-k8s-sidecar@sha256:15a5dfef37740e6c8d130faa389620b8d9f82f61fe177ce7d51f67be15a5166c",
+            "containerID": "docker://67f7d45dbeabe2528f2cf6c791794dbb71014ed1a42142175eecd0c7f2c6c64c",
+            "started": true
+          },
+          {
+            "name": "kafka-test-medium-uswest1-devc",
+            "state": {
+              "running": {
+                "startedAt": "2020-02-28T00:38:48Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "docker-paasta.yelpcorp.com:443/services-kafka-k8s:paasta-7376d422f7e475884340eeee36d5622e6a744166",
+            "imageID": "docker-pullable://docker-paasta.yelpcorp.com:443/services-kafka-k8s@sha256:7d42543540d49b42ac49efab9980801ec791466cd1c3886a973d3e8b1c57c6d6",
+            "containerID": "docker://cd7509beea0c2df54adf2c624496cc750ae04f9d49a8cb5ca2ebdf4a9ca67764",
+            "started": true
+          }
+        ],
+        "qosClass": "Guaranteed"
+      }
+    }
+  ]
+}
