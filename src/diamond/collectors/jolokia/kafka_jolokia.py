@@ -11,9 +11,10 @@ Collect Kafka metrics using jolokia agent
 ```
 """
 
-from jolokia import JolokiaCollector, MBean
 import re
-import sys
+
+from jolokia import JolokiaCollector
+
 
 class KafkaJolokiaCollector(JolokiaCollector):
     TOTAL_TOPICS = re.compile('kafka\.server:name=.*PerSec,type=BrokerTopicMetrics')
@@ -57,23 +58,8 @@ class KafkaJolokiaCollector(JolokiaCollector):
         # that, metric has no topic associated with it and is really for all topics on that broker
         if re.match(self.TOTAL_TOPICS, bean.prefix):
             dims["topic"] = "_TOTAL_"
-        # Handle multiple hosts mode
-        if self.config["multiple_hosts_mode"] and self.current_host_identifier:
-            dims["kafka_cluster"] = re.sub('^kafka-k8s', '', self.current_host_identifier)
+        dims.update(self.host_custom_dimensions)
         return metric_name, metric_type, dims
-
-    # override to only return the hosts whose identifiers begin with kafka-k8s
-    def patch_host_list(self, hosts):
-        res = {}
-        for service_name, value in hosts.iteritems():
-            matched = re.match('^(kafka-k8s[\\w_-]+)', service_name)
-            if matched:
-                kafka_cluster = matched.group(1)
-                res[kafka_cluster] = {
-                    'host': value.get('host'),
-                    'port': self.config['port']
-                }
-        return res
 
     def patch_metric_name(self, bean, metric_name_list):
         if self.config.get('prefix', None):

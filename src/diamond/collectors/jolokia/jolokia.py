@@ -46,15 +46,72 @@ an mbean.
     "-v\d+\.\d+\.\d+" = "-AllVersions"
     ".*GetS2Activities.*" = ""
 ```
+
+The ```mode``` of the collector can be either ```standalone``` for single container or
+```kubernetes``` when using kubernetes for schedule multiple containers on the host.
+
+In ```kubernetes```mode, hosts running on the node are discovered through the ```/pods```
+endpoint of the kubelet service expected to be running on the node. In this mode, the
+```label_selector``` field of ```spec``` is used to select pods, similar to the kubernetes
+[label selector](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/).
+If labels selectors are not specified, the collector will do nothing and will not collect
+any metrics in this mode.
+
+For example, collector can be configured to collect only metrics from pods with labels
+```paasta.yelp.com/service=kafka``` and ```paasta.yelp.com/instance=main``` using the
+following configurations
+
+```
+    "mode": "kubernetes",
+    "spec": {
+        "label_selector": {
+            "paasta.yelp.com/service": "kafka",
+            "paasta.yelp.com/instance": "main"
+        }
+    },
+```
+
+If desired the JolokiaCollector can be configured to scrap custom dimension for metrics.
+This can be done by setting the dimension reader name and the configuration in the
+```dimension``` value of ```spec```.
+
+For example, the ```kubernetes``` dimension reader can be configured as follows
+```
+    "mode": "kubernetes",
+    "spec": {
+        "dimensions" : {
+            "kubernetes" : {
+                "paasta_service": { "paasta.yelp.com/service": ".*" },
+                "paasta_instance": { "paasta.yelp.com/instance": ".*" },
+            }
+        }
+    }
+```
+In general, to configure any dimension reader use the following template
+```
+    "spec": {
+        "dimensions" : {
+            "${reader_name}" : ${reader_configuration}
+        }
+    }
+```
+Just replace ```${reader_name}``` by the name of the dimension reader and ```${reader_configuration}``
+with the configuration of any reader. If multiple dimension readers are configured, dimensions
+from all these readers will be merged together (see ```dimension_reader.CompositeDimensionReader```)
 """
 
-import diamond.collector
 import json
 import re
+import sys
 import time
 import urllib
 import urllib2
-import sys
+
+import diamond.collector
+
+import host_reader
+from dimension_reader import CompositeDimensionReader
+
 
 class MBean(object):
     def __init__(self, prefix, bean_key, bean_value):
@@ -87,7 +144,6 @@ class JolokiaCollector(diamond.collector.Collector):
     READ_URL = "/?ignoreErrors=true&includeStackTrace=false&maxCollectionSize=%s&p=read/%s"
     LIST_QUERY_URL = "/list/%s?maxDepth=%s"
 
-    NERVE_CONFIG_FILEPATH = '/etc/nerve/nerve.conf.json'
     """
     These domains contain MBeans that are for management purposes,
     or otherwise do not contain useful metrics
@@ -99,11 +155,11 @@ class JolokiaCollector(diamond.collector.Collector):
         config_help = super(JolokiaCollector,
                             self).get_default_config_help()
         config_help.update({
-            'mbeans':  "Pipe delimited list of MBeans for which to collect"
-                       " stats. If not provided, all stats will"
-                       " be collected.",
+            'mbeans': "Pipe delimited list of MBeans for which to collect"
+                      " stats. If not provided, all stats will"
+                      " be collected.",
             'regex': "Contols if mbeans option matches with regex,"
-                       " False by default.",
+                     " False by default.",
             'host': 'Hostname',
             'port': 'Port',
             'domain_blacklist': 'A list of blacklisted domains (no read request will be sent for these domains)',
@@ -113,8 +169,10 @@ class JolokiaCollector(diamond.collector.Collector):
             'url_path': 'Path to jolokia.  typically "jmx" or "jolokia"',
             'listing_max_depth': 'max depth of domain listings tree, 0=deepest, 1=keys only, 2=weird',
             'read_limit': 'Request size to read from jolokia, defaults to 1000, 0 = no limit',
-            'multiple_hosts_mode': 'If toggled on, the collector will collect the metrics from multiple hosts'
-                                   'it uses nerve to discover the hosts'
+            'mode': 'mode to run this collector. Accepted values are standalone and kubernetes. if kubernetes is set, '
+                    'it discovers hosts through the kubelet service running on the node. '
+                    'standalone by default',
+            'spec': 'mode specific configurations and declaration of dimension to read',
         })
         return config_help
 
@@ -131,7 +189,8 @@ class JolokiaCollector(diamond.collector.Collector):
             'port': 8778,
             'listing_max_depth': 1,
             'read_limit': 1000,
-            'multiple_hosts_mode': False
+            'mode': 'standalone',
+            'spec': {'dimensions': {}, 'label_selector': {}}
         })
         self.domain_keys = []
         self.last_list_request = 0
@@ -148,6 +207,7 @@ class JolokiaCollector(diamond.collector.Collector):
             self.mbeans = self.config['mbeans']
         if isinstance(self.config['rewrite'], dict):
             self.rewrite = self.config['rewrite']
+        self.host_custom_dimensions = {}
 
     def process_config(self):
         """
@@ -157,6 +217,13 @@ class JolokiaCollector(diamond.collector.Collector):
         super(JolokiaCollector, self).process_config()
         self.domain_blacklist = set(self.IGNORE_DOMAINS + self.config['domain_blacklist'])
 
+        self.host_reader = host_reader.get_by_mode(self.config['mode'])
+        self.host_reader.configure(self.config)
+
+        dimension_conf = self.config.get('spec', {}).get('dimensions', {})
+        self.dimension_reader = CompositeDimensionReader()
+        self.dimension_reader.configure(dimension_conf)
+
     def check_mbean(self, mbean):
         if not self.mbeans:
             return True
@@ -164,7 +231,7 @@ class JolokiaCollector(diamond.collector.Collector):
         if self.config['regex'] is not None:
             for chkbean in self.mbeans:
                 if re.match(chkbean, mbean) is not None or \
-                   re.match(chkbean, mbeanfix) is not None:
+                        re.match(chkbean, mbeanfix) is not None:
                     return True
         else:
             if mbean in self.mbeans or mbeanfix in self.mbeans:
@@ -200,13 +267,14 @@ class JolokiaCollector(diamond.collector.Collector):
         return False
 
     def collect(self):
-        hosts = {
-            'default': { 'host': self.config['host'], 'port': self.config['port'] }
-        } if not self.config['multiple_hosts_mode'] else self.read_host_list()
-        for host_identifier, h in hosts.iteritems():
-            self.current_host_identifier = host_identifier
-            host = h.get('host')
-            port = h.get('port')
+        hosts = self.host_reader.read()
+        port = self.config['port']
+        # read for all the hosts in one go to optimize
+        host_dimensions = self.dimension_reader.read(hosts)
+        for host in hosts:
+            # host custom dimension is set for each host. This is accessible to different
+            # collectors to use and attach dimension to their metrics for a host
+            self.host_custom_dimensions = host_dimensions.get(host, {})
             listing = self.list_request(host, port)
             try:
                 domains = listing['value'] if listing['status'] == 200 else {}
@@ -236,22 +304,6 @@ class JolokiaCollector(diamond.collector.Collector):
 
     def patch_host_list(self, hosts):
         return hosts
-
-    def read_host_list(self):
-        try:
-            with open(JolokiaCollector.NERVE_CONFIG_FILEPATH, 'r') as f:
-                hosts = {
-                    name: {
-                        'host': values.get('host'),
-                        'port': self.config['port']
-                    } for name, values in json.load(f)['services'].iteritems()
-                }
-            return self.patch_host_list(hosts)
-        except:
-            self.log.error(
-                'Unable to read host list from %s' % JolokiaCollector.NERVE_CONFIG_FILEPATH
-            )
-            return {}
 
     def list_request(self, host, port, bean_path=None):
         try:
@@ -344,7 +396,6 @@ class JolokiaCollector(diamond.collector.Collector):
         except:
             exctype, value = sys.exc_info()[:2]
             self.log.error(str(value))
-
 
     # There's no unambiguous way to interpret list values, so
     # this hook lets subclasses handle them.

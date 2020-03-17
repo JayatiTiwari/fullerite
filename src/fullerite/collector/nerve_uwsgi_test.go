@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"fullerite/config"
 	"fullerite/dropwizard"
 	"fullerite/metric"
 	"fullerite/util"
@@ -383,6 +384,32 @@ func TestConfigNerveUWSGI(t *testing.T) {
 	assert.Equal(t, "/etc/your/moms/house", inst.configFilePath)
 	assert.Equal(t, "littlepiggies", inst.queryPath)
 	assert.Equal(t, 12, inst.timeout)
+}
+
+func TestConfigNerveUWSGIserviceHeadersMap(t *testing.T) {
+
+	content := []byte(`{
+	"interval": 345,
+	"configFilePath": "/tmp/nerve/nerve.conf.json",
+	"queryPath": "status/metrics",
+	"http_timeout": 12,
+	"serviceHeaders": {
+		"yelp-main": {
+			"Host": "internalapi"
+		}
+	}
+}`)
+	tmpfile, _ := ioutil.TempFile("", "")
+	tmpfile.Write(content)
+	tmpfile.Close()
+	defer os.Remove(tmpfile.Name()) // clean up
+
+	cfg, _ := config.ReadCollectorConfig(tmpfile.Name())
+
+	inst := getTestNerveUWSGI()
+	inst.Configure(cfg)
+
+	assert.Equal(t, map[string]string{"Host": "internalapi"}, inst.serviceHeadersMap["yelp-main"])
 }
 
 func TestErrorQueryEndpointResponse(t *testing.T) {

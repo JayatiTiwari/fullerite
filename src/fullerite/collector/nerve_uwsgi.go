@@ -69,10 +69,26 @@ func (n *nerveUWSGICollector) Configure(configMap map[string]interface{}) {
 	if val, exists := configMap["servicesWhitelist"]; exists {
 		n.servicesWhitelist = config.GetAsSlice(val)
 	}
-	if val, exists := configMap["serviceHeaders"]; exists {
-		temp := val.(map[string]interface{})
-		for service, headers := range temp {
-			n.serviceHeadersMap[service] = headers.(map[string]string)
+
+	// All these loops and type casts are necessary because the map that we receive
+	// is just an interface and we cannot cast it directly to a nested map.
+	// serviceHeaders map example:
+	// "serviceHeaders": {
+	//     "yelp-main": {
+	//         "Host": "internalapi"
+	//     }
+	// }
+	n.serviceHeadersMap = make(map[string]map[string]string)
+	if serviceHeaders, exists := configMap["serviceHeaders"]; exists {
+		// For each service in the map, extract the headers
+		for service, headers := range serviceHeaders.(map[string]interface{}) {
+			// We cannot cast directly from map[string]interface{} to map[string]string
+			// so we need to create a new map and loop on the old to populate it.
+			headersMap := make(map[string]string)
+			for headerKey, headerVal := range headers.(map[string]interface{}) {
+				headersMap[headerKey] = headerVal.(string)
+			}
+			n.serviceHeadersMap[service] = headersMap
 		}
 	}
 	if val, exists := configMap["workersStatsBlacklist"]; exists {
