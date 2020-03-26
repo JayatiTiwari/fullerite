@@ -69,6 +69,7 @@ type DiskIOStats struct {
 
 // DiskPaastaStats contains the PaaSTA information of the container using this device as a mount.
 type DiskIOPaastaStats struct {
+	containerName      string
 	deviceName         string
 	paastaService      string
 	paastaInstance     string
@@ -299,6 +300,7 @@ func (d DockerStats) buildMetrics(container *docker.Container, containerStats *d
 		paastaIOStatsList := d.ObtainDiskIOAndPaastaStats(container, diskIOStatsList, realPathGetterFunc)
 		for _, record := range paastaIOStatsList {
 			ioStatRead := buildDockerMetric("DockerDiskReads", metric.Gauge, float64(record.reads))
+			ioStatRead.AddDimension("container_name", record.containerName)
 			ioStatRead.AddDimension("container_mount_path", record.containerMountPath)
 			ioStatRead.AddDimension("paasta_service", record.paastaService)
 			ioStatRead.AddDimension("paasta_instance", record.paastaInstance)
@@ -306,6 +308,7 @@ func (d DockerStats) buildMetrics(container *docker.Container, containerStats *d
 			ret = append(ret, ioStatRead)
 
 			ioStatWrite := buildDockerMetric("DockerDiskWrites", metric.Gauge, float64(record.writes))
+			ioStatWrite.AddDimension("container_name", record.containerName)
 			ioStatWrite.AddDimension("container_mount_path", record.containerMountPath)
 			ioStatWrite.AddDimension("paasta_service", record.paastaService)
 			ioStatWrite.AddDimension("paasta_instance", record.paastaInstance)
@@ -314,6 +317,7 @@ func (d DockerStats) buildMetrics(container *docker.Container, containerStats *d
 
 			io := record.writes + record.reads
 			ioStat := buildDockerMetric("DockerDiskIO", metric.Gauge, float64(io))
+			ioStat.AddDimension("container_name", record.containerName)
 			ioStat.AddDimension("container_mount_path", record.containerMountPath)
 			ioStat.AddDimension("paasta_service", record.paastaService)
 			ioStat.AddDimension("paasta_instance", record.paastaInstance)
@@ -517,20 +521,22 @@ func (d DockerStats) ObtainDiskIOAndPaastaStats(container *docker.Container, dis
 	var paastaIOStatsList []DiskIOPaastaStats
 	var deviceMountPath string
 	var err error
+	var containerName string
 	// check all the mounts of the container to check if it matches the mount paths of devices on this device.
 	for _, mount := range container.Mounts {
 		mountPath := mount.Source
 		for _, device := range diskIOStatsList {
+			envVariableMap := make(map[string]string)
 			deviceMountPath = device.mountPath
 			// to elimiate any mismatch due to the symlink /var/lib for /ephemeral
 			deviceMountPath, err = realPathGetterFunc(deviceMountPath)
 			if err != nil {
-				d.log.Error("Error obtaining the realpath for " + deviceMountPath + ". Skipping.")
-				continue
+				if strings.HasPrefix(deviceMountPath, "/ephemeral") {
+					deviceMountPath = strings.Replace(deviceMountPath, "ephemeral", "var/lib", 1)
+				}
 			}
 			if mountPath == deviceMountPath {
 				env := container.Config.Env
-				envVariableMap := make(map[string]string)
 				// extract the paasta information from the container evn config
 				for _, variable := range env {
 					if strings.HasPrefix(variable, "PAASTA") {
@@ -542,16 +548,23 @@ func (d DockerStats) ObtainDiskIOAndPaastaStats(container *docker.Container, dis
 					}
 					// we want to emit the complete set of paasta service+cluster+instence or nothing
 					if len(envVariableMap) == 3 {
-						for _, iostat := range diskIOStatsList {
-							if iostat.deviceName == device.deviceName {
-								paastaIOStatsList = append(paastaIOStatsList, DiskIOPaastaStats{device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], iostat.reads, iostat.writes, mount.Destination})
-							}
-						}
+						// extract the container name from the labels
+						labels := container.Config.Labels
+						// default container name
+						containerName = ""
+						containerName = labels["io.kubernetes.container.name"]
+						paastaIOStatsList = append(paastaIOStatsList, DiskIOPaastaStats{containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], device.reads, device.writes, mount.Destination})
+						break
 					}
 				}
 			}
+			// if found the match for this mount of the the container, no need to continue looking, so break to the next mount
+			if len(envVariableMap) == 3 {
+				break
+			}
 		}
 	}
+
 	return paastaIOStatsList
 }
 
@@ -560,5 +573,6 @@ func ObtainRealPath(mountPath string) (string, error) {
 	if err == nil {
 		return mountPathReal, err
 	}
-	return "", err
+	// return back the string, so that it can be checked for symlink by the error handling code
+	return mountPath, err
 }
