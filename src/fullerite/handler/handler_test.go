@@ -149,6 +149,7 @@ func TestRecordTimings(t *testing.T) {
 }
 
 func TestHandlerRunFlushInterval(t *testing.T) {
+	t.Skip("This test is flaky on overloaded hosts (jenkins)")
 	var mu sync.Mutex
 	base := BaseHandler{}
 	base.log = l.WithField("testing", "basehandler_flush")
