@@ -4,6 +4,8 @@ import (
 	"fullerite/config"
 	"fullerite/metric"
 
+	"fullerite/handler"
+
 	"encoding/json"
 	"fmt"
 	"io"
@@ -109,6 +111,7 @@ func (srv InternalServer) handlePrometheusMetricsRequest(writer http.ResponseWri
 	prometheusInternalMetricsMemoryStats(writer)
 	prometheusInternalMetricsHandlerStats(writer, srv.handlerStatFunc())
 	prometheusInternalMetricsCollectorStats(writer, srv.collectorStatFunc())
+	handler.PrometheustableRead(writer)
 }
 
 func prometheusInternalMetricsMemoryStats(writer http.ResponseWriter) {

@@ -165,6 +165,8 @@ type BaseHandler struct {
 	// List of whitelisted collectors
 	// the handler will accept metrics from
 	whiteListedCollectors map[string]bool
+
+	PassBeginAndEnd bool
 }
 
 // SetMaxBufferSize : set the buffer size
@@ -440,6 +442,8 @@ func (base *BaseHandler) configureCommonParams(configMap map[string]interface{})
 		whiteList := config.GetAsSlice(asInterface)
 		base.SetCollectorWhiteList(whiteList)
 	}
+
+	base.PassBeginAndEnd = false
 }
 
 func (base *BaseHandler) run(emitFunc func([]metric.Metric) bool) {
@@ -491,6 +495,14 @@ stopReading:
 				}
 				continue
 			}
+			if !base.PassBeginAndEnd {
+				if incomingMetric.BeginCollection() {
+					continue
+				}
+				if incomingMetric.EndCollection() {
+					continue
+				}
+			}
 
 			base.log.Debug(base.Name(), " metric: ", incomingMetric)
 			metrics = append(metrics, incomingMetric)
@@ -498,6 +510,9 @@ stopReading:
 
 			if int(currentBufferSize) >= collectorEnd.BufferSize {
 				base.log.Debug("Full: ", currentBufferSize, " col: ", collectorName)
+				flushFunction()
+			}
+			if incomingMetric.EndCollection() {
 				flushFunction()
 			}
 		case <-flusher:

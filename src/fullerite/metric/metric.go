@@ -40,6 +40,20 @@ func Sentinel() Metric {
 	return WithValue("fullerite.emit_now", 0)
 }
 
+// Dummy metric used to signal beginning of a collector run
+func BeginCollection(collector string) Metric {
+	m := WithValue("fullerite.begin_collection", 0)
+	m.AddDimension("collector", collector)
+	return m
+}
+
+// Dummy metric used to signal end of a collector run
+func EndCollection(collector string) Metric {
+	m := WithValue("fullerite.end_collection", 0)
+	m.AddDimension("collector", collector)
+	return m
+}
+
 // AddDimension adds a new dimension to the Metric.
 func (m *Metric) AddDimension(name, value string) {
 	if m.Dimensions == nil {
@@ -90,6 +104,16 @@ func (m *Metric) ZeroValue() bool {
 // all buffered metrics
 func (m *Metric) Sentinel() bool {
 	return (m.Name == "fullerite.emit_now")
+}
+
+// Check for special value
+func (m *Metric) BeginCollection() bool {
+	return (m.Name == "fullerite.begin_collection")
+}
+
+// Check for special value
+func (m *Metric) EndCollection() bool {
+	return (m.Name == "fullerite.end_collection")
 }
 
 // AddToAll adds a map of dimensions to a list of metrics

@@ -90,6 +90,8 @@ func TestStartCollectorTooLong(t *testing.T) {
 	c := make(map[string]interface{})
 	c["interval"] = 1
 	collector := startCollector("Test", config.Config{}, c)
+	startMetric := <-collector.Channel()
+	assert.Equal(t, "fullerite.begin_collection", startMetric.Name)
 
 	select {
 	case m := <-collector.Channel():

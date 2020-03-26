@@ -58,6 +58,7 @@ func runCollector(collector collector.Collector) {
 	for {
 		select {
 		case <-collect:
+			collector.Channel() <- metric.BeginCollection(collector.Name())
 			if collector.CollectorType() == "listener" {
 				collector.Collect()
 			} else {
@@ -67,6 +68,7 @@ func runCollector(collector collector.Collector) {
 				collector.Collect()
 				countdownTimer.Stop()
 			}
+			collector.Channel() <- metric.EndCollection(collector.Name())
 		}
 	}
 	ticker.Stop()
