@@ -1,3 +1,4 @@
 configobj
 mock
 mysqlclient
+requests
