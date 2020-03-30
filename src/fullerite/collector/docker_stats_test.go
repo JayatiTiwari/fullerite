@@ -244,6 +244,9 @@ func TestDockerStatsBuildMetricsWithEmitDiskMetrics(t *testing.T) {
                 "SizeRw": 1234,
                 "SizeRootFs": 5678,
                 "Config": {
+"Labels": {
+                        "io.kubernetes.container.name": "test_name"
+                },
                         "Env": [
                                 "MESOS_TASK_ID=my--service.main.blablagit6bdsadnoise",
                                 "PAASTA_INSTANCE=test_instance",
@@ -298,6 +301,7 @@ func TestDockerStatsBuildMetricsWithEmitDiskMetrics(t *testing.T) {
 		"instance_name": "main",
 	}
 	expectedDimsDisk := map[string]string{
+		"container_name":       "test_name",
 		"container_mount_path": "test_path",
 		"paasta_service":       "test_service",
 		"paasta_instance":      "test_instance",
