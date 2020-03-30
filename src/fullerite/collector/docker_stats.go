@@ -530,41 +530,40 @@ func (d DockerStats) ObtainDiskIOAndPaastaStats(container *docker.Container, dis
 			deviceMountPath = device.mountPath
 			// to elimiate any mismatch due to the symlink /var/lib for /ephemeral
 			deviceMountPath, err = realPathGetterFunc(deviceMountPath)
+			// if realPathGetter fails, manually check if there is a symlink and replace ephemeral --> var/lib
 			if err != nil {
 				if strings.HasPrefix(deviceMountPath, "/ephemeral") {
 					deviceMountPath = strings.Replace(deviceMountPath, "ephemeral", "var/lib", 1)
 				}
 			}
-			if mountPath == deviceMountPath {
-				env := container.Config.Env
-				// extract the paasta information from the container evn config
-				for _, variable := range env {
-					if strings.HasPrefix(variable, "PAASTA") {
-						name := strings.Split(variable, "=")[0]
-						value := strings.Split(variable, "=")[1]
-						if (name == "PAASTA_CLUSTER" || name == "PAASTA_INSTANCE" || name == "PAASTA_SERVICE") && len(strings.TrimSpace(value)) > 0 {
-							envVariableMap[name] = value
-						}
-					}
-					// we want to emit the complete set of paasta service+cluster+instence or nothing
-					if len(envVariableMap) == 3 {
-						// extract the container name from the labels
-						labels := container.Config.Labels
-						// default container name
-						containerName = ""
-						containerName = labels["io.kubernetes.container.name"]
-						paastaIOStatsList = append(paastaIOStatsList, DiskIOPaastaStats{containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], device.reads, device.writes, mount.Destination})
-						break
+
+			if mountPath != deviceMountPath {
+				continue
+			}
+
+			env := container.Config.Env
+			// extract the paasta information from the container evn config
+			for _, variable := range env {
+				if strings.HasPrefix(variable, "PAASTA") {
+					name := strings.Split(variable, "=")[0]
+					value := strings.Split(variable, "=")[1]
+					if (name == "PAASTA_CLUSTER" || name == "PAASTA_INSTANCE" || name == "PAASTA_SERVICE") && len(strings.TrimSpace(value)) > 0 {
+						envVariableMap[name] = value
 					}
 				}
 			}
-			// if found the match for this mount of the the container, no need to continue looking, so break to the next mount
+			// we want to emit the complete set of paasta service+cluster+instence or nothing
 			if len(envVariableMap) == 3 {
+				// extract the container name from the labels
+				labels := container.Config.Labels
+				// default container name
+				containerName = labels["io.kubernetes.container.name"]
+				paastaIOStatsList = append(paastaIOStatsList, DiskIOPaastaStats{containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], device.reads, device.writes, mount.Destination})
+				// break the diskIOStatsList for loop and move to the next mount path of the container
 				break
 			}
 		}
 	}
-
 	return paastaIOStatsList
 }
 
