@@ -201,7 +201,7 @@ func TestDockerStatsBuildMetricsWithEmitDiskMetrics(t *testing.T) {
 	diskStats["test-id"] = statVals
 
 	var diskIOStatsList []DiskIOStats
-	diskIOStatsList = append(diskIOStatsList, DiskIOStats{"testDevice", 202, 0, "testSource", 0, 0})
+	diskIOStatsList = append(diskIOStatsList, DiskIOStats{"testDevice", 202, 0, "testSource", 1000, 1000})
 
 	err := json.Unmarshal(envVars, &val)
 	assert.Equal(t, err, nil)
@@ -244,7 +244,7 @@ func TestDockerStatsBuildMetricsWithEmitDiskMetrics(t *testing.T) {
                 "SizeRw": 1234,
                 "SizeRootFs": 5678,
                 "Config": {
-"Labels": {
+                "Labels": {
                         "io.kubernetes.container.name": "test_name"
                 },
                         "Env": [
@@ -322,15 +322,20 @@ func TestDockerStatsBuildMetricsWithEmitDiskMetrics(t *testing.T) {
 		metric.Metric{"DockerBlkDeviceWriteBytes", "cumcounter", 5678, dev34Dims},
 		metric.Metric{"DockerBlkDeviceTotalRequests", "cumcounter", 1111, dev34Dims},
 		metric.Metric{"DockerContainerCount", "counter", 1, expectedDimsGen},
-		metric.Metric{"DockerDiskReads", "gauge", 0, expectedDimsDisk},
-		metric.Metric{"DockerDiskWrites", "gauge", 0, expectedDimsDisk},
-		metric.Metric{"DockerDiskIO", "gauge", 0, expectedDimsDisk},
+		metric.Metric{"DockerDiskReads", "gauge", 1000, expectedDimsDisk},
+		metric.Metric{"DockerDiskWrites", "gauge", 1000, expectedDimsDisk},
+		metric.Metric{"DockerDiskIO", "gauge", 2000, expectedDimsDisk},
 	}
 
 	d := getSUT()
 	d.Configure(config)
 	d.emitDiskMetrics = true
-	ret := d.buildMetrics(container, stats, 0.5, diskStats, diskIOStatsList, MockObtainRealPath)
+	var ret []metric.Metric
+	d.buildMetrics(container, stats, 0.5, diskStats, diskIOStatsList, MockObtainRealPath)
+	// since the first value of any meteric is always 0, adding another record
+	diskIOStatsList = nil
+	diskIOStatsList = append(diskIOStatsList, DiskIOStats{"testDevice", 202, 0, "testSource", 2000, 2000})
+	ret = d.buildMetrics(container, stats, 0.5, diskStats, diskIOStatsList, MockObtainRealPath)
 	assert.Equal(t, ret, expectedMetrics)
 }
 

@@ -25,6 +25,14 @@ const (
 	endpoint = "unix:///var/run/docker.sock"
 )
 
+// return the constant map for max values of the metrics
+func getMetricsMaxValues() map[string]float64 {
+	maxValues := make(map[string]float64)
+	maxValues["reads"] = 4294967295
+	maxValues["writes"] = 4294967295
+	return maxValues
+}
+
 type RealPathGetter func(mountPath string) (string, error)
 
 // DockerStats collector type.
@@ -41,6 +49,7 @@ type DockerStats struct {
 	mu                *sync.Mutex
 	emitImageName     bool
 	emitDiskMetrics   bool
+	lastValues        map[string]float64
 }
 
 // CPUValues struct contains the last cpu-usage values in order to compute properly the current values.
@@ -97,6 +106,7 @@ func newDockerStats(channel chan metric.Metric, initialInterval int, log *l.Entr
 	d.compiledRegex = make(map[string]*Regex)
 	d.emitImageName = false
 	d.emitDiskMetrics = false
+	d.lastValues = make(map[string]float64)
 	return d
 }
 
@@ -299,30 +309,33 @@ func (d DockerStats) buildMetrics(container *docker.Container, containerStats *d
 		// get the IO and PaaSTA stats for this container
 		paastaIOStatsList := d.ObtainDiskIOAndPaastaStats(container, diskIOStatsList, realPathGetterFunc)
 		for _, record := range paastaIOStatsList {
-			ioStatRead := buildDockerMetric("DockerDiskReads", metric.Gauge, float64(record.reads))
-			ioStatRead.AddDimension("container_name", record.containerName)
-			ioStatRead.AddDimension("container_mount_path", record.containerMountPath)
-			ioStatRead.AddDimension("paasta_service", record.paastaService)
-			ioStatRead.AddDimension("paasta_instance", record.paastaInstance)
-			ioStatRead.AddDimension("paasta_cluster", record.paastaCluster)
-			ret = append(ret, ioStatRead)
-
-			ioStatWrite := buildDockerMetric("DockerDiskWrites", metric.Gauge, float64(record.writes))
-			ioStatWrite.AddDimension("container_name", record.containerName)
-			ioStatWrite.AddDimension("container_mount_path", record.containerMountPath)
-			ioStatWrite.AddDimension("paasta_service", record.paastaService)
-			ioStatWrite.AddDimension("paasta_instance", record.paastaInstance)
-			ioStatWrite.AddDimension("paasta_cluster", record.paastaCluster)
-			ret = append(ret, ioStatWrite)
-
 			io := record.writes + record.reads
-			ioStat := buildDockerMetric("DockerDiskIO", metric.Gauge, float64(io))
-			ioStat.AddDimension("container_name", record.containerName)
-			ioStat.AddDimension("container_mount_path", record.containerMountPath)
-			ioStat.AddDimension("paasta_service", record.paastaService)
-			ioStat.AddDimension("paasta_instance", record.paastaInstance)
-			ioStat.AddDimension("paasta_cluster", record.paastaCluster)
-			ret = append(ret, ioStat)
+			// matching the diskusage collectors logic at https://github.com/Yelp/fullerite/blob/a23d7daea4f894e517959b7e84f61a5b2b9c93c2/src/diamond/collectors/diskusage/diskusage.py#L281
+			if io > 0 {
+				ioStatRead := buildDockerMetric("DockerDiskReads", metric.Gauge, record.reads)
+				ioStatRead.AddDimension("container_name", record.containerName)
+				ioStatRead.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatRead.AddDimension("paasta_service", record.paastaService)
+				ioStatRead.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatRead.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatRead)
+
+				ioStatWrite := buildDockerMetric("DockerDiskWrites", metric.Gauge, record.writes)
+				ioStatWrite.AddDimension("container_name", record.containerName)
+				ioStatWrite.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatWrite.AddDimension("paasta_service", record.paastaService)
+				ioStatWrite.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatWrite.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatWrite)
+
+				ioStat := buildDockerMetric("DockerDiskIO", metric.Gauge, io)
+				ioStat.AddDimension("container_name", record.containerName)
+				ioStat.AddDimension("container_mount_path", record.containerMountPath)
+				ioStat.AddDimension("paasta_service", record.paastaService)
+				ioStat.AddDimension("paasta_instance", record.paastaInstance)
+				ioStat.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStat)
+			}
 		}
 	}
 	return ret
@@ -522,6 +535,9 @@ func (d DockerStats) ObtainDiskIOAndPaastaStats(container *docker.Container, dis
 	var deviceMountPath string
 	var err error
 	var containerName string
+	var reads float64
+	var writes float64
+	var readKey, writeKey string
 	// check all the mounts of the container to check if it matches the mount paths of devices on this device.
 	for _, mount := range container.Mounts {
 		mountPath := mount.Source
@@ -530,36 +546,40 @@ func (d DockerStats) ObtainDiskIOAndPaastaStats(container *docker.Container, dis
 			deviceMountPath = device.mountPath
 			// to elimiate any mismatch due to the symlink /var/lib for /ephemeral
 			deviceMountPath, err = realPathGetterFunc(deviceMountPath)
+			// if realPathGetter fails, manually check if there is a symlink and replace ephemeral --> var/lib
 			if err != nil {
 				if strings.HasPrefix(deviceMountPath, "/ephemeral") {
 					deviceMountPath = strings.Replace(deviceMountPath, "ephemeral", "var/lib", 1)
 				}
 			}
-			if mountPath == deviceMountPath {
-				env := container.Config.Env
-				// extract the paasta information from the container evn config
-				for _, variable := range env {
-					if strings.HasPrefix(variable, "PAASTA") {
-						name := strings.Split(variable, "=")[0]
-						value := strings.Split(variable, "=")[1]
-						if (name == "PAASTA_CLUSTER" || name == "PAASTA_INSTANCE" || name == "PAASTA_SERVICE") && len(strings.TrimSpace(value)) > 0 {
-							envVariableMap[name] = value
-						}
-					}
-					// we want to emit the complete set of paasta service+cluster+instence or nothing
-					if len(envVariableMap) == 3 {
-						// extract the container name from the labels
-						labels := container.Config.Labels
-						// default container name
-						containerName = ""
-						containerName = labels["io.kubernetes.container.name"]
-						paastaIOStatsList = append(paastaIOStatsList, DiskIOPaastaStats{containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], device.reads, device.writes, mount.Destination})
-						break
+
+			if mountPath != deviceMountPath {
+				continue
+			}
+			env := container.Config.Env
+			// extract the paasta information from the container evn config
+			for _, variable := range env {
+				if strings.HasPrefix(variable, "PAASTA") {
+					name := strings.Split(variable, "=")[0]
+					value := strings.Split(variable, "=")[1]
+					if (name == "PAASTA_CLUSTER" || name == "PAASTA_INSTANCE" || name == "PAASTA_SERVICE") && len(strings.TrimSpace(value)) > 0 {
+						envVariableMap[name] = value
 					}
 				}
 			}
-			// if found the match for this mount of the the container, no need to continue looking, so break to the next mount
+			// we want to emit the complete set of paasta service+cluster+instence or nothing
 			if len(envVariableMap) == 3 {
+				// extract the container name from the labels
+				labels := container.Config.Labels
+				containerName = labels["io.kubernetes.container.name"]
+				// create distinct keys for each metric of each container, to be able to use the last value in the derivative
+				readKey = containerName + "." + device.deviceName + "." + envVariableMap["PAASTA_SERVICE"] + "." + envVariableMap["PAASTA_INSTANCE"] + "." + envVariableMap["PAASTA_CLUSTER"] + "." + "reads"
+				writeKey = containerName + "." + device.deviceName + "." + envVariableMap["PAASTA_SERVICE"] + "." + envVariableMap["PAASTA_INSTANCE"] + "." + envVariableMap["PAASTA_CLUSTER"] + "." + "writes"
+				maxValues := getMetricsMaxValues()
+				// obtain the derivative for reads and writes metrics
+				d.lastValues, reads = d.Derivative(d.lastValues, maxValues["reads"], readKey, device.reads, false, false)
+				d.lastValues, writes = d.Derivative(d.lastValues, maxValues["writes"], writeKey, device.writes, false, false)
+				paastaIOStatsList = append(paastaIOStatsList, DiskIOPaastaStats{containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], reads, writes, mount.Destination})
 				break
 			}
 		}
@@ -575,4 +595,38 @@ func ObtainRealPath(mountPath string) (string, error) {
 	}
 	// return back the string, so that it can be checked for symlink by the error handling code
 	return mountPath, err
+}
+
+// Calculate the derivative value of the given metric
+func (d DockerStats) Derivative(lastValues map[string]float64, maxValue float64, key string, newValue float64, timeDelta bool, allowNegative bool) (map[string]float64, float64) {
+	var derivativeX, derivativeY, interval, result float64
+	// calculate the derivative of the metric
+	if oldValue, ok := lastValues[key]; ok {
+		// Check for rollover
+		if newValue < oldValue {
+			oldValue = oldValue - maxValue
+		}
+		// Get Change in X (value)
+		derivativeX = newValue - oldValue
+
+		// Using the default value in collector.py which is 300
+		interval = 1
+
+		// Get Change in Y (time)
+		if timeDelta {
+			derivativeY = interval
+		} else {
+			derivativeY = 1
+		}
+		result = float64(derivativeX) / float64(derivativeY)
+		if result < 0 && !allowNegative {
+			result = 0
+		}
+	} else {
+		result = 0
+	}
+
+	lastValues[key] = newValue
+
+	return lastValues, result
 }
