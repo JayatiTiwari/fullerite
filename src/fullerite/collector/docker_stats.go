@@ -22,16 +22,10 @@ import (
 )
 
 const (
-	endpoint = "unix:///var/run/docker.sock"
+	endpoint       = "unix:///var/run/docker.sock"
+	MaxReadsValue  = 4294967295
+	MaxWritesValue = 4294967295
 )
-
-// return the constant map for max values of the metrics
-func getMetricsMaxValues() map[string]float64 {
-	maxValues := make(map[string]float64)
-	maxValues["reads"] = 4294967295
-	maxValues["writes"] = 4294967295
-	return maxValues
-}
 
 type RealPathGetter func(mountPath string) (string, error)
 
@@ -573,12 +567,11 @@ func (d DockerStats) ObtainDiskIOAndPaastaStats(container *docker.Container, dis
 				labels := container.Config.Labels
 				containerName = labels["io.kubernetes.container.name"]
 				// create distinct keys for each metric of each container, to be able to use the last value in the derivative
-				readKey = containerName + "." + device.deviceName + "." + envVariableMap["PAASTA_SERVICE"] + "." + envVariableMap["PAASTA_INSTANCE"] + "." + envVariableMap["PAASTA_CLUSTER"] + "." + "reads"
-				writeKey = containerName + "." + device.deviceName + "." + envVariableMap["PAASTA_SERVICE"] + "." + envVariableMap["PAASTA_INSTANCE"] + "." + envVariableMap["PAASTA_CLUSTER"] + "." + "writes"
-				maxValues := getMetricsMaxValues()
+				readKey = BuildKey(containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], "reads")
+				writeKey = BuildKey(containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], "writes")
 				// obtain the derivative for reads and writes metrics
-				d.lastValues, reads = d.Derivative(d.lastValues, maxValues["reads"], readKey, device.reads, false, false)
-				d.lastValues, writes = d.Derivative(d.lastValues, maxValues["writes"], writeKey, device.writes, false, false)
+				reads = d.Derivative(MaxReadsValue, readKey, device.reads)
+				writes = d.Derivative(MaxWritesValue, writeKey, device.writes)
 				paastaIOStatsList = append(paastaIOStatsList, DiskIOPaastaStats{containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], reads, writes, mount.Destination})
 				break
 			}
@@ -586,6 +579,10 @@ func (d DockerStats) ObtainDiskIOAndPaastaStats(container *docker.Container, dis
 	}
 
 	return paastaIOStatsList
+}
+
+func BuildKey(containerName string, deviceName string, serviceName string, instanceName string, clusterName string, metricName string) string {
+	return containerName + "." + deviceName + "." + serviceName + "." + instanceName + "." + clusterName + "." + metricName
 }
 
 func ObtainRealPath(mountPath string) (string, error) {
@@ -598,10 +595,10 @@ func ObtainRealPath(mountPath string) (string, error) {
 }
 
 // Calculate the derivative value of the given metric
-func (d DockerStats) Derivative(lastValues map[string]float64, maxValue float64, key string, newValue float64, timeDelta bool, allowNegative bool) (map[string]float64, float64) {
-	var derivativeX, derivativeY, interval, result float64
+func (d DockerStats) Derivative(maxValue float64, key string, newValue float64) float64 {
+	var derivativeX, derivativeY, result float64
 	// calculate the derivative of the metric
-	if oldValue, ok := lastValues[key]; ok {
+	if oldValue, ok := d.lastValues[key]; ok {
 		// Check for rollover
 		if newValue < oldValue {
 			oldValue = oldValue - maxValue
@@ -609,24 +606,16 @@ func (d DockerStats) Derivative(lastValues map[string]float64, maxValue float64,
 		// Get Change in X (value)
 		derivativeX = newValue - oldValue
 
-		// Using the default value in collector.py which is 300
-		interval = 1
-
-		// Get Change in Y (time)
-		if timeDelta {
-			derivativeY = interval
-		} else {
-			derivativeY = 1
-		}
+		derivativeY = 1
 		result = float64(derivativeX) / float64(derivativeY)
-		if result < 0 && !allowNegative {
+		if result < 0 {
 			result = 0
 		}
 	} else {
 		result = 0
 	}
 
-	lastValues[key] = newValue
+	d.lastValues[key] = newValue
 
-	return lastValues, result
+	return result
 }
