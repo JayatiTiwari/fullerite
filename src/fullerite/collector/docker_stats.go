@@ -179,12 +179,12 @@ func (d *DockerStats) Collect() {
 	if d.emitDiskMetrics {
 		// Obtain the disk stats for this device. This is common for all the containers, hence, calculating before iterating over all the containers.
 		diskStats, err = d.ObtainDiskStats()
-		if err != nil {
+		if err != nil && err != io.EOF {
 			d.log.Error("ObtainDiskStats() failed: ", err)
 		}
 		// join the disk stats with the IO stats
 		diskIOStatsList, err = d.ObtainDiskIOStats(diskStats)
-		if err != nil {
+		if err != nil && err != io.EOF {
 			d.log.Error("ObtainDiskIOStats() failed: ", err)
 		}
 	}
@@ -406,7 +406,6 @@ func min(x, y int) int {
 // returns a map, each record containing (device name --> [disk stats])
 func (d DockerStats) ObtainDiskStats() (map[string][]string, error) {
 	devNameMinMajMap := make(map[string][]string)
-	var major int
 
 	file, err := os.Open("/proc/diskstats")
 	if err != nil {
@@ -428,13 +427,7 @@ func (d DockerStats) ObtainDiskStats() (map[string][]string, error) {
 		// split the line on space
 		rec := strings.Fields(line)
 		if len(rec) == 14 {
-			// filter out system devices and any other which are not EC2 (major != 202). For reference, https://cromwell-intl.com/cybersecurity/ec2-secure-storage.html
-			major, err = strconv.Atoi(rec[0])
-			if err != nil {
-				d.log.Warning("Could not extract the major number for the device:" + line)
-				continue
-			}
-			if !strings.HasPrefix(rec[2], "ram") && !strings.HasPrefix(rec[2], "loop") && major == 202 {
+			if !strings.HasPrefix(rec[2], "ram") && !strings.HasPrefix(rec[2], "loop") {
 				devNameMinMajMap[rec[2]] = []string{rec[0], rec[1], rec[2], rec[3], rec[4], rec[5], rec[6], rec[7], rec[8], rec[9], rec[10], rec[11], rec[12], rec[13]}
 			}
 		} else {
