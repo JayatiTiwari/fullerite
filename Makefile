@@ -1,6 +1,6 @@
 FULLERITE      := fullerite
 BEATIT         := beatit
-VERSION        := 0.6.84
+VERSION        := 0.6.85
 SRCDIR         := src
 GLIDE          := glide
 HANDLER_DIR    := $(SRCDIR)/fullerite/handler
