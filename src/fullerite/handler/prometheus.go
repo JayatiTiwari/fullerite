@@ -204,11 +204,15 @@ func addPrometheusMetric(m metric.Metric) {
 		return
 	}
 
-	name := fmt.Sprintf("%s_%s", collectorName, getMetricKey(m.Name))
-	labels := dimensionsToString(m.Dimensions)
-	pm := NewPrometheusMetric(m)
-	t := m.MetricType
-	c.StoreMetric(name, labels, t, pm)
+	name := getMetricKey(m.Name)
+	if nameMatcher.MatchString(name) {
+		labels := dimensionsToString(m.Dimensions)
+		pm := NewPrometheusMetric(m)
+		t := m.MetricType
+		c.StoreMetric(name, labels, t, pm)
+	} else {
+        defaultLog.WithFields(l.Fields{"handler": "prometheus"}).Errorf("Non prometheus compatible metric name encountered: '%s'", name)
+    }
 }
 
 // PrometheustableRead is the ntry point from internal metric server, this function dumps the types and text output
