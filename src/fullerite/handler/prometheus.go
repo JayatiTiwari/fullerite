@@ -74,7 +74,7 @@ func (c *Collector) GenerateBytesAndDelete() {
 
 		for key, metric := range t.Metrics {
 			v := strconv.FormatFloat(metric.Value, 'f', -1, 64)
-			out := fmt.Sprintf("%s %s %d\n", key, v, metric.LastUpdate.Unix())
+			out := fmt.Sprintf("%s %s %d\n", key, v, metric.LastUpdate.UnixNano()/1000000)
 			metricBytes = append(metricBytes, []byte(out)...)
 		}
 		t.metricMutex.Unlock()
@@ -204,15 +204,19 @@ func addPrometheusMetric(m metric.Metric) {
 		return
 	}
 
-	name := getMetricKey(m.Name)
+	name := lowerFirst(nameEscaper.Replace(m.Name))
+	if name == "fullerite_collector_datapoints" {
+		return
+	}
+
 	if nameMatcher.MatchString(name) {
 		labels := dimensionsToString(m.Dimensions)
 		pm := NewPrometheusMetric(m)
 		t := m.MetricType
 		c.StoreMetric(name, labels, t, pm)
 	} else {
-        defaultLog.WithFields(l.Fields{"handler": "prometheus"}).Errorf("Non prometheus compatible metric name encountered: '%s'", name)
-    }
+		defaultLog.WithFields(l.Fields{"handler": "prometheus"}).Warnf("Non prometheus compatible metric name encountered: '%s'", name)
+	}
 }
 
 // PrometheustableRead is the ntry point from internal metric server, this function dumps the types and text output
@@ -225,7 +229,6 @@ func PrometheustableRead(w io.Writer) {
 		out = append(out, b...)
 	}
 	outBytesMutex.Unlock()
-
 	w.Write([]byte(out))
 }
 
@@ -233,16 +236,12 @@ func PrometheustableRead(w io.Writer) {
 var (
 	labelEscaper = strings.NewReplacer("\\", `\\`, "\n", `\n`, "\"", `\"`)
 	// This is not escaping all possible wrong charaters, just those we've actually observed from collectors
-	nameEscaper = strings.NewReplacer("$", "", ".", "_", "-", "_", "/", "", "'", "", " ", "_")
+	nameEscaper          = strings.NewReplacer("$", "", ".", "_", "-", "_", "/", "", "'", "", " ", "_")
+	dimensionNameEscaper = strings.NewReplacer("-", "_")
 	// https://prometheus.io/docs/concepts/data_model/
 	// It must match the regex [a-zA-Z_:][a-zA-Z0-9_:]*
 	nameMatcher = regexp.MustCompile("[a-zA-Z_:][a-zA-Z0-9_:]*")
 )
-
-func getMetricKey(name string) string {
-	var output = lowerFirst(nameEscaper.Replace(name))
-	return output
-}
 
 func dimensionsToString(
 	dims map[string]string,
@@ -253,7 +252,7 @@ func dimensionsToString(
 
 	keys := make([]string, 0, len(dims))
 	for key := range dims {
-		keys = append(keys, key)
+		keys = append(keys, dimensionNameEscaper.Replace(key))
 	}
 
 	sort.Strings(keys)
