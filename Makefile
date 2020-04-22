@@ -66,11 +66,11 @@ deps:
 
 $(FULLERITE): $(SOURCES) deps
 	@echo Building $(FULLERITE)...
-	@go build -o bin/$(FULLERITE) $@
+	@go build -ldflags '-X main.version=$(VERSION)' -o bin/$(FULLERITE) $@
 
 $(BEATIT): $(BEATIT_SOURCES)
 	@echo Building $(BEATIT)...
-	@go build -o bin/$(BEATIT) fullerite/beatit
+	@go build -ldflags '-X main.version=$(VERSION)' -o bin/$(BEATIT) fullerite/beatit
 
 go:
 	uname -a |grep -qE '^Linux.*x86_64' && curl -s https://dl.google.com/go/go1.13.linux-amd64.tar.gz | tar xz
