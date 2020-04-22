@@ -2,12 +2,14 @@ package handler
 
 import (
 	"fullerite/metric"
+	"sort"
+	"strconv"
+	"sync"
 
 	"fmt"
 	"io"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 	"unicode"
 	"unicode/utf8"
@@ -15,9 +17,123 @@ import (
 	l "github.com/Sirupsen/logrus"
 )
 
-// Beging Fullerite handler boilerplate
+// collectors is our global list of collectors
+var collectorsMutex sync.RWMutex
+var collectors Collectors
 
-// Handler type
+//Collectors is a map of Collector objects
+type Collectors map[string]*Collector
+
+//For egress purposes, we do not want to be blocked by any metrics which are being scraped.
+var outBytesMutex sync.Mutex
+var outBytes map[string][]byte
+
+//Collector contains all of the metrics and the types for those metrics
+type Collector struct {
+	Name      string
+	Types     map[string]*PrometheusType
+	typeMutex sync.Mutex
+}
+
+//NewCollector creates a new collector based on its name
+func NewCollector(name string) *Collector {
+	t := make(map[string]*PrometheusType)
+	c := Collector{
+		Name:      name,
+		Types:     t,
+		typeMutex: sync.Mutex{},
+	}
+
+	return &c
+}
+
+//StoreMetric adds the metric in the list and create the type if it does not already exist.
+func (c *Collector) StoreMetric(metricName string, labels string, metricType string, pm PrometheusMetric) {
+	key := metricName + labels
+	c.typeMutex.Lock()
+	t, ok := c.Types[metricName]
+	if !ok {
+		t = NewPrometheusType(metricName, metricType)
+		c.Types[metricName] = t
+	}
+	t.metricMutex.Lock()
+	t.Metrics[key] = pm
+	t.metricMutex.Unlock()
+	c.typeMutex.Unlock()
+}
+
+//GenerateBytesAndDelete creates the list of bytes that represents
+//the metric output for this collector, and deletes any metrics or types from before the collector started
+func (c *Collector) GenerateBytesAndDelete() {
+	collectorsMutex.Lock()
+	metricBytes := make([]byte, 0)
+	c.typeMutex.Lock()
+	for _, t := range c.Types {
+		t.metricMutex.Lock()
+		metricBytes = append(metricBytes, []byte(t.String())...)
+
+		for key, metric := range t.Metrics {
+			v := strconv.FormatFloat(metric.Value, 'f', -1, 64)
+			out := fmt.Sprintf("%s %s %d\n", key, v, metric.LastUpdate.Unix())
+			metricBytes = append(metricBytes, []byte(out)...)
+		}
+		t.metricMutex.Unlock()
+	}
+	c.Types = make(map[string]*PrometheusType)
+	c.typeMutex.Unlock()
+	collectorsMutex.Unlock()
+
+	outBytesMutex.Lock()
+	outBytes[c.Name] = metricBytes
+	outBytesMutex.Unlock()
+}
+
+//PrometheusType is the type of metric
+type PrometheusType struct {
+	Name        string
+	Type        string
+	Metrics     map[string]PrometheusMetric
+	metricMutex sync.Mutex
+}
+
+//NewPrometheusType generates a new MetricType object based on name and type, and returns a pointer
+func NewPrometheusType(name, metricType string) *PrometheusType {
+	t := strings.ToLower(metricType)
+	if t == "cumcounter" {
+		t = "counter"
+	}
+	m := make(map[string]PrometheusMetric)
+	mt := PrometheusType{
+		Name:        name,
+		Type:        t,
+		Metrics:     m,
+		metricMutex: sync.Mutex{},
+	}
+
+	return &mt
+}
+
+func (t *PrometheusType) String() string {
+	s := fmt.Sprintf("# TYPE %s %s\n", t.Name, t.Type)
+	return s
+}
+
+// PrometheusMetric stores prometheus metric details
+type PrometheusMetric struct {
+	Value      float64
+	LastUpdate time.Time
+}
+
+// NewPrometheusMetric returns a new prometheus metric object
+func NewPrometheusMetric(m metric.Metric) PrometheusMetric {
+	pm := PrometheusMetric{
+		Value:      m.Value,
+		LastUpdate: time.Now(),
+	}
+	return pm
+}
+
+// Prometheus handler type
 type Prometheus struct {
 	BaseHandler
 }
@@ -61,105 +177,51 @@ func (h *Prometheus) emitMetrics(metrics []metric.Metric) bool {
 
 func init() {
 	RegisterHandler("Prometheus", newPrometheus)
-	metricCollectorTable = make(map[string][]metric.Metric)
-	metricOutputTypes = make(map[string]bool)
-	metricOutputTable = make(map[string]string)
+	collectors = make(Collectors)
+	outBytes = make(map[string][]byte)
 }
-
-// We maintain 2 sets of tables of metrics
-// First the 'metricCollectorTable' which holds all the metrics
-// from a single collector run. Due to the way that stats arrive
-// at the handler they may be interleved, so we seperate them out
-// into different arrays. Once a collector finishes (EndCollection)
-// we take all the metrics we've seen from that handler and serialize
-// them as a text blob that we store in metricOutputTable.
-// This two level approach means that any clients will see a consistent
-// set of metrics for each collector run, and the metrics from
-// each collector are atomically replaced as far as clients see.
-var metricCollectorTableMutex = &sync.Mutex{}
-var metricCollectorTable map[string][]metric.Metric
-var metricOutputTableMutex = &sync.Mutex{}
-var metricOutputTypes map[string]bool // True is counter, false a gauge
-var metricOutputTable map[string]string
 
 // addPrometheusMetric is the entrypoint of metrics from the 'normal' collector machinery
 func addPrometheusMetric(m metric.Metric) {
+	//Get the name of the collector and check to see if it already in our map
+	//if not, create it.
 	collectorName, _ := m.GetDimensionValue("collector")
-	metricCollectorTableMutex.Lock()
+	var c *Collector
+	var ok bool
+	collectorsMutex.Lock()
+	if c, ok = collectors[collectorName]; !ok {
+		c = NewCollector(collectorName)
+		collectors[collectorName] = c
+	}
+	collectorsMutex.Unlock()
+
 	if m.BeginCollection() {
-		if _, ok := metricCollectorTable[collectorName]; !ok {
-			metricCollectorTable[collectorName] = make([]metric.Metric, 0)
-		}
-		metricCollectorTableMutex.Unlock()
 		return
 	}
+
 	if m.EndCollection() {
-		collected := metricCollectorTable[collectorName]
-		metricCollectorTable[collectorName] = make([]metric.Metric, 0)
-		metricCollectorTableMutex.Unlock()
-		// we copied the array above into a local variable 'collected'
-		// therefore we can safely call writeTable asynchronously
-		// rather than having to potenttially wait on the output table
-		// mutex here
-		go writeTable(collectorName, collected)
+		c.GenerateBytesAndDelete()
 		return
 	}
-	metricCollectorTable[collectorName] = append(metricCollectorTable[collectorName], m)
-	if m.MetricType == metric.Gauge {
-		metricOutputTypes[m.Name] = false
-	} else {
-		metricOutputTypes[m.Name] = true
-	}
-	metricCollectorTableMutex.Unlock()
+
+	name := fmt.Sprintf("%s_%s", collectorName, getMetricKey(m.Name))
+	labels := dimensionsToString(m.Dimensions)
+	pm := NewPrometheusMetric(m)
+	t := m.MetricType
+	c.StoreMetric(name, labels, t, pm)
 }
 
-// Serialize a list of metrics into text table
-func writeTable(name string, metrics []metric.Metric) {
-	var out string
-	time := time.Now().UnixNano() / 1000000
-	for i, _ := range metrics {
-		key := getMetricKey(metrics[i])
-		// https://prometheus.io/docs/concepts/data_model/
-		// It must match the regex [a-zA-Z_:][a-zA-Z0-9_:]*
-		if !nameMatcher.MatchString(key) {
-			continue
-		} else {
-			out += fmt.Sprintf("%s %f %d\n", key, metrics[i].Value, time)
-		}
-	}
-	metricOutputTableMutex.Lock()
-	metricOutputTable[name] = out
-	metricOutputTableMutex.Unlock()
-}
-
-// Entry point from internal metric server, this function dumps the types and text output tables
-// to a writer.
+// PrometheustableRead is the ntry point from internal metric server, this function dumps the types and text output
+// tables to a writer.
 func PrometheustableRead(w io.Writer) {
-	// Explicitly buffer the output in a string so we have the lock for the minimum time
-	// Get out of the critical section before writing the table, which could blok given a slow client
-	// We can assume clients will generally be well behaved, so in practice this buffering is on
-	// the stack (so cheap) and the concurrency should be fairly limited (only a handful of clients, every 5s)
-	var out string
-	metricOutputTableMutex.Lock()
+	out := make([]byte, 0)
 	// Write out all of the type info for prometheus metrics
-	for k, t := range metricOutputTypes {
-		name := lowerFirst(nameEscaper.Replace(k))
-		// Throw away non matching types
-		if nameMatcher.MatchString(k) {
-			typeString := "counter"
-			if !t {
-				typeString = "gauge"
-			}
-			out += fmt.Sprintf("# TYPE %s %s\n", name, typeString)
-		} else {
-			defaultLog.WithFields(l.Fields{"handler": "prometheus"}).Errorf("Non prometheus compatible metric name stored: '%s'", name)
-		}
+	outBytesMutex.Lock()
+	for _, b := range outBytes {
+		out = append(out, b...)
 	}
-	// Serialize the body
-	for _, chunk := range metricOutputTable {
-		out += chunk
-	}
-	metricOutputTableMutex.Unlock()
+	outBytesMutex.Unlock()
+
 	w.Write([]byte(out))
 }
 
@@ -173,9 +235,8 @@ var (
 	nameMatcher = regexp.MustCompile("[a-zA-Z_:][a-zA-Z0-9_:]*")
 )
 
-func getMetricKey(metric metric.Metric) string {
-	var output = lowerFirst(nameEscaper.Replace(metric.Name))
-	output += dimensionsToString(metric.Dimensions)
+func getMetricKey(name string) string {
+	var output = lowerFirst(nameEscaper.Replace(name))
 	return output
 }
 
@@ -185,11 +246,20 @@ func dimensionsToString(
 	if len(dims) == 0 {
 		return "{}"
 	}
+
+	keys := make([]string, 0, len(dims))
+	for key := range dims {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys)
+
 	var (
 		output    string
 		seperator = "{"
 	)
-	for k, v := range dims {
+	for _, k := range keys {
+		v := dims[k]
 		output += seperator
 		output += k
 		output += `="`
