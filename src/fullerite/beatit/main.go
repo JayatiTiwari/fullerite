@@ -16,10 +16,12 @@ import (
 )
 
 const (
-	name    = "beatit"
-	version = "0.6.88"
-	desc    = "Stress test fullerite handlers"
+	name = "beatit"
+	desc = "Stress test fullerite handlers"
 )
+
+// Set by the Makefile at build time
+var version string
 
 var log = logrus.WithFields(logrus.Fields{"app": "fullerite"})
 

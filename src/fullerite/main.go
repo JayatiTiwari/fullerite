@@ -16,10 +16,12 @@ import (
 )
 
 const (
-	name    = "fullerite"
-	version = "0.6.88"
-	desc    = "Diamond compatible metrics collector"
+	name = "fullerite"
+	desc = "Diamond compatible metrics collector"
 )
+
+// Set by the Makefile at build time
+var version string
 
 var log = logrus.WithFields(logrus.Fields{"app": "fullerite"})
 
