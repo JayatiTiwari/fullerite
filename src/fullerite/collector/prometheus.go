@@ -12,7 +12,7 @@ import (
 
 const (
 	// Fullerite version
-	version = "0.6.86"
+	version = "0.6.87"
 
 	// Prometheus parser can process metrics in `application/openmetrics-text` and `text/plain` formats
 	acceptHeader = `application/openmetrics-text; version=0.0.1,text/plain;version=0.0.4;q=0.5,*/*;q=0.1`
