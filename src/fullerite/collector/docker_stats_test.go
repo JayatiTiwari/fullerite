@@ -76,7 +76,7 @@ func TestDockerStatsBuildMetrics(t *testing.T) {
 	diskStats["nvme0n1"] = statVals
 
 	var diskIOStatsList []DiskIOStats
-	deviceOne := DiskIOStats{"nvme0n1", 202, 2, "/nail", 3.9686986, 1.9316838}
+	deviceOne := DiskIOStats{"nvme0n1", 202, 2, "/nail", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	diskIOStatsList = append(diskIOStatsList, deviceOne)
 
 	err := json.Unmarshal(envVars, &val)
@@ -201,7 +201,7 @@ func TestDockerStatsBuildMetricsWithEmitDiskMetrics(t *testing.T) {
 	diskStats["test-id"] = statVals
 
 	var diskIOStatsList []DiskIOStats
-	diskIOStatsList = append(diskIOStatsList, DiskIOStats{"testDevice", 202, 0, "testSource", 1000, 1000})
+	diskIOStatsList = append(diskIOStatsList, DiskIOStats{"testDevice", 202, 0, "testSource", 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000})
 
 	err := json.Unmarshal(envVars, &val)
 	assert.Equal(t, err, nil)
@@ -308,6 +308,25 @@ func TestDockerStatsBuildMetricsWithEmitDiskMetrics(t *testing.T) {
 		"paasta_cluster":       "test_cluster",
 	}
 
+	var readRequestsMergedPerSecond, writesRequestsMergedPerSecond, readsPerSecond, writesPerSecond, readBytePerSecond, writeBytePerSecond, averageQueueLength, utilPercentage, readAwait, writeAwait, averageRequestSizeByte, serviceTime, await, iops, concurrentIo float64
+	// calculating the expected metrics values based on the input
+	timeDelta := 10
+	readRequestsMergedPerSecond = float64(1000 / timeDelta)
+	writesRequestsMergedPerSecond = float64(1000 / timeDelta)
+	readsPerSecond = float64(1000 / timeDelta)
+	writesPerSecond = float64(1000 / timeDelta)
+	readBytePerSecond = float64(512000 / timeDelta)
+	writeBytePerSecond = float64(512000 / timeDelta)
+	averageQueueLength = 0.1
+	utilPercentage = float64(1000 / timeDelta / 10)
+	readAwait = 1.0
+	writeAwait = 1.0
+	averageRequestSizeByte = 512.0
+	serviceTime = float64(0.5)
+	await = 1.0
+	iops = float64(2000 / timeDelta)
+	concurrentIo = float64(0.1)
+
 	expectedMetrics := []metric.Metric{
 		metric.Metric{"DockerMemoryUsed", "gauge", 50, baseDims},
 		metric.Metric{"DockerMemoryLimit", "gauge", 70, baseDims},
@@ -325,6 +344,26 @@ func TestDockerStatsBuildMetricsWithEmitDiskMetrics(t *testing.T) {
 		metric.Metric{"DockerDiskReads", "gauge", 1000, expectedDimsDisk},
 		metric.Metric{"DockerDiskWrites", "gauge", 1000, expectedDimsDisk},
 		metric.Metric{"DockerDiskIO", "gauge", 2000, expectedDimsDisk},
+		metric.Metric{"DockerDiskWritesMerged", "gauge", 1000, expectedDimsDisk},
+		metric.Metric{"DockerDiskReadsMerged", "gauge", 1000, expectedDimsDisk},
+		metric.Metric{"DockerDiskWritesByte", "gauge", 512000, expectedDimsDisk},
+		metric.Metric{"DockerDiskReadsByte", "gauge", 512000, expectedDimsDisk},
+		metric.Metric{"DockerDiskReadRequestsMergedPerSecond", "gauge", readRequestsMergedPerSecond, expectedDimsDisk},
+		metric.Metric{"DockerDiskWritesRequestsMergedPerSecond", "gauge", writesRequestsMergedPerSecond, expectedDimsDisk},
+		metric.Metric{"DockerDiskReadsPerSecond", "gauge", readsPerSecond, expectedDimsDisk},
+		metric.Metric{"DockerDiskWritesPerSecond", "gauge", writesPerSecond, expectedDimsDisk},
+		metric.Metric{"DockerDiskReadBytePerSecond", "gauge", readBytePerSecond, expectedDimsDisk},
+		metric.Metric{"DockerDiskWriteBytePerSecond", "gauge", writeBytePerSecond, expectedDimsDisk},
+		metric.Metric{"DockerDiskAverageQueueLength", "gauge", averageQueueLength, expectedDimsDisk},
+		metric.Metric{"DockerDiskUtilPercentage", "gauge", utilPercentage, expectedDimsDisk},
+		metric.Metric{"DockerDiskReadAwait", "gauge", readAwait, expectedDimsDisk},
+		metric.Metric{"DockerDiskWriteAwait", "gauge", writeAwait, expectedDimsDisk},
+		metric.Metric{"DockerDiskServiceTime", "gauge", serviceTime, expectedDimsDisk},
+		metric.Metric{"DockerDiskAwait", "gauge", await, expectedDimsDisk},
+		metric.Metric{"DockerDiskAverageRequestSizeByte", "gauge", averageRequestSizeByte, expectedDimsDisk},
+		metric.Metric{"DockerDiskIops", "gauge", iops, expectedDimsDisk},
+		metric.Metric{"DockerDiskConcurrentIO", "gauge", concurrentIo, expectedDimsDisk},
+		metric.Metric{"DockerDiskIOInProgress", "gauge", 2000, expectedDimsDisk},
 	}
 
 	d := getSUT()
@@ -334,7 +373,7 @@ func TestDockerStatsBuildMetricsWithEmitDiskMetrics(t *testing.T) {
 	d.buildMetrics(container, stats, 0.5, diskStats, diskIOStatsList, MockObtainRealPath)
 	// since the first value of any meteric is always 0, adding another record
 	diskIOStatsList = nil
-	diskIOStatsList = append(diskIOStatsList, DiskIOStats{"testDevice", 202, 0, "testSource", 2000, 2000})
+	diskIOStatsList = append(diskIOStatsList, DiskIOStats{"testDevice", 202, 0, "testSource", 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000})
 	ret = d.buildMetrics(container, stats, 0.5, diskStats, diskIOStatsList, MockObtainRealPath)
 	assert.Equal(t, ret, expectedMetrics)
 }
@@ -357,7 +396,7 @@ func TestDockerStatsBuildwithEmitImageName(t *testing.T) {
 	diskStats["test-id"] = statVals
 
 	var diskIOStatsList []DiskIOStats
-	diskIOStatsList = append(diskIOStatsList, DiskIOStats{"test-id", 202, 0, "testSource", 0, 0})
+	diskIOStatsList = append(diskIOStatsList, DiskIOStats{"test-id", 202, 0, "testSource", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
 
 	err := json.Unmarshal(envVars, &val)
 	assert.Equal(t, err, nil)
@@ -438,7 +477,7 @@ func TestDockerStatsBuildMetricsWithNameAsEnvVariable(t *testing.T) {
 	diskStats["test-id"] = statVals
 
 	var diskIOStatsList []DiskIOStats
-	diskIOStatsList = append(diskIOStatsList, DiskIOStats{"test-id", 202, 0, "testSource", 0, 0})
+	diskIOStatsList = append(diskIOStatsList, DiskIOStats{"test-id", 202, 0, "testSource", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
 
 	err := json.Unmarshal(envVars, &val)
 	assert.Equal(t, err, nil)

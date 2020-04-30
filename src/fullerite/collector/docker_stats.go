@@ -9,6 +9,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -22,9 +23,9 @@ import (
 )
 
 const (
-	endpoint       = "unix:///var/run/docker.sock"
-	MaxReadsValue  = 4294967295
-	MaxWritesValue = 4294967295
+	endpoint    = "unix:///var/run/docker.sock"
+	byte_unit   = "byte"
+	sector_size = 512
 )
 
 type RealPathGetter func(mountPath string) (string, error)
@@ -34,16 +35,18 @@ type RealPathGetter func(mountPath string) (string, error)
 // dockerClient is the client for the Docker remote API.
 type DockerStats struct {
 	baseCollector
-	previousCPUValues map[string]*CPUValues
-	dockerClient      *docker.Client
-	statsTimeout      int
-	compiledRegex     map[string]*Regex
-	skipRegex         *regexp.Regexp
-	endpoint          string
-	mu                *sync.Mutex
-	emitImageName     bool
-	emitDiskMetrics   bool
-	lastValues        map[string]float64
+	previousCPUValues  map[string]*CPUValues
+	dockerClient       *docker.Client
+	statsTimeout       int
+	compiledRegex      map[string]*Regex
+	skipRegex          *regexp.Regexp
+	endpoint           string
+	mu                 *sync.Mutex
+	emitImageName      bool
+	emitDiskMetrics    bool
+	lastValues         map[string]float64
+	lastCollectionTime time.Time
+	maxValues          map[string]float64
 }
 
 // CPUValues struct contains the last cpu-usage values in order to compute properly the current values.
@@ -62,24 +65,42 @@ type Regex struct {
 
 // DiskIOStats contains disk stats needed for deriving the IO metric of the device.
 type DiskIOStats struct {
-	deviceName string
-	minor      int
-	major      int
-	mountPath  string
-	reads      float64
-	writes     float64
+	deviceName             string
+	minor                  int
+	major                  int
+	mountPath              string
+	reads                  float64
+	readsMerged            float64
+	readsSectors           float64
+	readsMilliseconds      float64
+	writes                 float64
+	writesMerged           float64
+	writesSectors          float64
+	writesMilliseconds     float64
+	ioInProgress           float64
+	ioMilliseconds         float64
+	ioMillisecondsWeighted float64
 }
 
 // DiskPaastaStats contains the PaaSTA information of the container using this device as a mount.
 type DiskIOPaastaStats struct {
-	containerName      string
-	deviceName         string
-	paastaService      string
-	paastaInstance     string
-	paastaCluster      string
-	reads              float64
-	writes             float64
-	containerMountPath string
+	containerName          string
+	deviceName             string
+	paastaService          string
+	paastaInstance         string
+	paastaCluster          string
+	reads                  float64
+	readsMerged            float64
+	readsByte              float64
+	readsMilliseconds      float64
+	writes                 float64
+	writesMerged           float64
+	writesByte             float64
+	writesMilliseconds     float64
+	ioInProgress           float64
+	ioMilliseconds         float64
+	ioMillisecondsWeighted float64
+	containerMountPath     string
 }
 
 func init() {
@@ -101,6 +122,19 @@ func newDockerStats(channel chan metric.Metric, initialInterval int, log *l.Entr
 	d.emitImageName = false
 	d.emitDiskMetrics = false
 	d.lastValues = make(map[string]float64)
+	d.maxValues = make(map[string]float64)
+	// value (2 ** 32) - 1
+	d.maxValues["reads"] = 4294967295
+	d.maxValues["readsMerged"] = 4294967295
+	d.maxValues["readsMilliseconds"] = 4294967295
+	d.maxValues["writes"] = 4294967295
+	d.maxValues["writesMerged"] = 4294967295
+	d.maxValues["writesMilliseconds"] = 4294967295
+	d.maxValues["ioMilliseconds"] = 4294967295
+	d.maxValues["ioMillisecondsWeighted"] = 4294967295
+	// value (2 ** 64) - 1
+	d.maxValues["readsSectors"] = 1.8446744e+19
+	d.maxValues["writesSectors"] = 1.8446744e+19
 	return d
 }
 
@@ -300,6 +334,14 @@ func (d DockerStats) buildMetrics(container *docker.Container, containerStats *d
 	metric.AddToAll(&ret, d.extractDimensions(container))
 
 	if d.emitDiskMetrics {
+		var timeDelta float64
+		// Handle collection time intervals correctly
+		collectTime := time.Now()
+		timeDelta = float64(d.interval)
+		if !d.lastCollectionTime.IsZero() {
+			timeDelta = collectTime.Sub(d.lastCollectionTime).Seconds()
+		}
+		d.lastCollectionTime = collectTime
 		// get the IO and PaaSTA stats for this container
 		paastaIOStatsList := d.ObtainDiskIOAndPaastaStats(container, diskIOStatsList, realPathGetterFunc)
 		for _, record := range paastaIOStatsList {
@@ -329,6 +371,202 @@ func (d DockerStats) buildMetrics(container *docker.Container, containerStats *d
 				ioStat.AddDimension("paasta_instance", record.paastaInstance)
 				ioStat.AddDimension("paasta_cluster", record.paastaCluster)
 				ret = append(ret, ioStat)
+
+				ioStatWritesMerged := buildDockerMetric("DockerDiskWritesMerged", metric.Gauge, record.writesMerged)
+				ioStatWritesMerged.AddDimension("container_name", record.containerName)
+				ioStatWritesMerged.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatWritesMerged.AddDimension("paasta_service", record.paastaService)
+				ioStatWritesMerged.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatWritesMerged.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatWritesMerged)
+
+				ioStatReadsMerged := buildDockerMetric("DockerDiskReadsMerged", metric.Gauge, record.readsMerged)
+				ioStatReadsMerged.AddDimension("container_name", record.containerName)
+				ioStatReadsMerged.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatReadsMerged.AddDimension("paasta_service", record.paastaService)
+				ioStatReadsMerged.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatReadsMerged.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatReadsMerged)
+
+				ioStatWritesByte := buildDockerMetric("DockerDiskWritesByte", metric.Gauge, record.writesByte)
+				ioStatWritesByte.AddDimension("container_name", record.containerName)
+				ioStatWritesByte.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatWritesByte.AddDimension("paasta_service", record.paastaService)
+				ioStatWritesByte.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatWritesByte.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatWritesByte)
+
+				ioStatReadsByte := buildDockerMetric("DockerDiskReadsByte", metric.Gauge, record.readsByte)
+				ioStatReadsByte.AddDimension("container_name", record.containerName)
+				ioStatReadsByte.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatReadsByte.AddDimension("paasta_service", record.paastaService)
+				ioStatReadsByte.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatReadsByte.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatReadsByte)
+
+				readRequestsMergedPerSecond := record.readsMerged / timeDelta
+				ioStatReadRequestsMergedPerSecond := buildDockerMetric("DockerDiskReadRequestsMergedPerSecond", metric.Gauge, readRequestsMergedPerSecond)
+				ioStatReadRequestsMergedPerSecond.AddDimension("container_name", record.containerName)
+				ioStatReadRequestsMergedPerSecond.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatReadRequestsMergedPerSecond.AddDimension("paasta_service", record.paastaService)
+				ioStatReadRequestsMergedPerSecond.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatReadRequestsMergedPerSecond.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatReadRequestsMergedPerSecond)
+
+				writesRequestsMergedPerSecond := record.writesMerged / timeDelta
+				ioStatWritesRequestsMergedPerSecond := buildDockerMetric("DockerDiskWritesRequestsMergedPerSecond", metric.Gauge, writesRequestsMergedPerSecond)
+				ioStatWritesRequestsMergedPerSecond.AddDimension("container_name", record.containerName)
+				ioStatWritesRequestsMergedPerSecond.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatWritesRequestsMergedPerSecond.AddDimension("paasta_service", record.paastaService)
+				ioStatWritesRequestsMergedPerSecond.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatWritesRequestsMergedPerSecond.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatWritesRequestsMergedPerSecond)
+
+				readsPerSecond := record.reads / timeDelta
+				ioStatReadsPerSecond := buildDockerMetric("DockerDiskReadsPerSecond", metric.Gauge, readsPerSecond)
+				ioStatReadsPerSecond.AddDimension("container_name", record.containerName)
+				ioStatReadsPerSecond.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatReadsPerSecond.AddDimension("paasta_service", record.paastaService)
+				ioStatReadsPerSecond.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatReadsPerSecond.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatReadsPerSecond)
+
+				writesPerSecond := record.writes / timeDelta
+				ioStatWritesPerSecond := buildDockerMetric("DockerDiskWritesPerSecond", metric.Gauge, writesPerSecond)
+				ioStatWritesPerSecond.AddDimension("container_name", record.containerName)
+				ioStatWritesPerSecond.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatWritesPerSecond.AddDimension("paasta_service", record.paastaService)
+				ioStatWritesPerSecond.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatWritesPerSecond.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatWritesPerSecond)
+
+				readBytePerSecond := record.readsByte / timeDelta
+				ioStatReadBytePerSecond := buildDockerMetric("DockerDiskReadBytePerSecond", metric.Gauge, readBytePerSecond)
+				ioStatReadBytePerSecond.AddDimension("container_name", record.containerName)
+				ioStatReadBytePerSecond.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatReadBytePerSecond.AddDimension("paasta_service", record.paastaService)
+				ioStatReadBytePerSecond.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatReadBytePerSecond.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatReadBytePerSecond)
+
+				writeBytePerSecond := record.writesByte / timeDelta
+				ioStatWriteBytePerSecond := buildDockerMetric("DockerDiskWriteBytePerSecond", metric.Gauge, writeBytePerSecond)
+				ioStatWriteBytePerSecond.AddDimension("container_name", record.containerName)
+				ioStatWriteBytePerSecond.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatWriteBytePerSecond.AddDimension("paasta_service", record.paastaService)
+				ioStatWriteBytePerSecond.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatWriteBytePerSecond.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatWriteBytePerSecond)
+
+				averageQueueLength := record.ioMillisecondsWeighted / timeDelta / 1000.0
+				ioStatAverageQueueLength := buildDockerMetric("DockerDiskAverageQueueLength", metric.Gauge, averageQueueLength)
+				ioStatAverageQueueLength.AddDimension("container_name", record.containerName)
+				ioStatAverageQueueLength.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatAverageQueueLength.AddDimension("paasta_service", record.paastaService)
+				ioStatAverageQueueLength.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatAverageQueueLength.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatAverageQueueLength)
+
+				utilPercentage := record.ioMilliseconds / timeDelta / 10.0
+				ioStatUtilPercentage := buildDockerMetric("DockerDiskUtilPercentage", metric.Gauge, utilPercentage)
+				ioStatUtilPercentage.AddDimension("container_name", record.containerName)
+				ioStatUtilPercentage.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatUtilPercentage.AddDimension("paasta_service", record.paastaService)
+				ioStatUtilPercentage.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatUtilPercentage.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatUtilPercentage)
+
+				var readAwait float64
+				if record.reads > 0 {
+					readAwait = record.readsMilliseconds / record.reads
+				} else {
+					readAwait = 0
+				}
+				ioStatReadAwait := buildDockerMetric("DockerDiskReadAwait", metric.Gauge, readAwait)
+				ioStatReadAwait.AddDimension("container_name", record.containerName)
+				ioStatReadAwait.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatReadAwait.AddDimension("paasta_service", record.paastaService)
+				ioStatReadAwait.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatReadAwait.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatReadAwait)
+
+				var writeAwait float64
+				if record.writes > 0 {
+					writeAwait = record.writesMilliseconds / record.writes
+				} else {
+					writeAwait = 0
+				}
+				ioStatWriteAwait := buildDockerMetric("DockerDiskWriteAwait", metric.Gauge, writeAwait)
+				ioStatWriteAwait.AddDimension("container_name", record.containerName)
+				ioStatWriteAwait.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatWriteAwait.AddDimension("paasta_service", record.paastaService)
+				ioStatWriteAwait.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatWriteAwait.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatWriteAwait)
+
+				var serviceTime, await, averageRequestSizeByte float64
+				// Set to zero so the nodes are valid even if we have 0 io for the metric duration
+				averageRequestSizeByte = 0
+				if io > 0 {
+					averageRequestSizeByte = (record.readsByte + record.writesByte) / io
+					serviceTime = record.ioMilliseconds / io
+					await = (record.readsMilliseconds + record.writesMilliseconds) / io
+				} else {
+					averageRequestSizeByte = 0
+					serviceTime = 0
+					await = 0
+				}
+				ioStatServiceTime := buildDockerMetric("DockerDiskServiceTime", metric.Gauge, serviceTime)
+				ioStatServiceTime.AddDimension("container_name", record.containerName)
+				ioStatServiceTime.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatServiceTime.AddDimension("paasta_service", record.paastaService)
+				ioStatServiceTime.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatServiceTime.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatServiceTime)
+
+				ioStatAwait := buildDockerMetric("DockerDiskAwait", metric.Gauge, await)
+				ioStatAwait.AddDimension("container_name", record.containerName)
+				ioStatAwait.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatAwait.AddDimension("paasta_service", record.paastaService)
+				ioStatAwait.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatAwait.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatAwait)
+
+				ioStatAverageRequestSizeByte := buildDockerMetric("DockerDiskAverageRequestSizeByte", metric.Gauge, averageRequestSizeByte)
+				ioStatAverageRequestSizeByte.AddDimension("container_name", record.containerName)
+				ioStatAverageRequestSizeByte.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatAverageRequestSizeByte.AddDimension("paasta_service", record.paastaService)
+				ioStatAverageRequestSizeByte.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatAverageRequestSizeByte.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatAverageRequestSizeByte)
+
+				iops := io / timeDelta
+				ioStatIops := buildDockerMetric("DockerDiskIops", metric.Gauge, iops)
+				ioStatIops.AddDimension("container_name", record.containerName)
+				ioStatIops.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatIops.AddDimension("paasta_service", record.paastaService)
+				ioStatIops.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatIops.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatIops)
+
+				// http://www.scribd.com/doc/15013525 Page 28
+				concurrentIo := (readsPerSecond + writesPerSecond) * (serviceTime / 1000.0)
+				ioStatConcurrentIo := buildDockerMetric("DockerDiskConcurrentIO", metric.Gauge, concurrentIo)
+				ioStatConcurrentIo.AddDimension("container_name", record.containerName)
+				ioStatConcurrentIo.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatConcurrentIo.AddDimension("paasta_service", record.paastaService)
+				ioStatConcurrentIo.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatConcurrentIo.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatConcurrentIo)
+
+				ioInProgress := record.ioInProgress
+				ioStatIOInProgress := buildDockerMetric("DockerDiskIOInProgress", metric.Gauge, ioInProgress)
+				ioStatIOInProgress.AddDimension("container_name", record.containerName)
+				ioStatIOInProgress.AddDimension("container_mount_path", record.containerMountPath)
+				ioStatIOInProgress.AddDimension("paasta_service", record.paastaService)
+				ioStatIOInProgress.AddDimension("paasta_instance", record.paastaInstance)
+				ioStatIOInProgress.AddDimension("paasta_cluster", record.paastaCluster)
+				ret = append(ret, ioStatIOInProgress)
 			}
 		}
 	}
@@ -448,8 +686,7 @@ func (d DockerStats) ObtainDiskIOStats(diskStats map[string][]string) ([]DiskIOS
 	var diskIOStatsList []DiskIOStats
 	var major int
 	var minor int
-	var reads float64
-	var writes float64
+	var reads, readsMerged, readsSectors, readsMilliseconds, writes, writesMerged, writesSectors, writesMilliseconds, ioInProgress, ioMilliseconds, ioMillisecondsWeighted float64
 
 	file, err := os.Open("/proc/mounts")
 	if err != nil {
@@ -500,13 +737,59 @@ func (d DockerStats) ObtainDiskIOStats(diskStats map[string][]string) ([]DiskIOS
 				d.log.Warning("Could not parse " + stats[3] + " to float. Skipping this line.")
 				continue
 			}
+			readsMerged, err = strconv.ParseFloat(stats[4], 64)
+			if err != nil {
+				d.log.Warning("Could not parse " + stats[4] + " to float. Skipping this line.")
+				continue
+			}
+			readsSectors, err = strconv.ParseFloat(stats[5], 64)
+			if err != nil {
+				d.log.Warning("Could not parse " + stats[5] + " to float. Skipping this line.")
+				continue
+			}
+			readsMilliseconds, err = strconv.ParseFloat(stats[6], 64)
+			if err != nil {
+				d.log.Warning("Could not parse " + stats[6] + " to float. Skipping this line.")
+				continue
+			}
 			writes, err = strconv.ParseFloat(stats[7], 64)
 			if err != nil {
 				d.log.Warning("Could not parse " + stats[4] + " to float. Skipping this line.")
 				continue
 			}
+			writesMerged, err = strconv.ParseFloat(stats[8], 64)
+			if err != nil {
+				d.log.Warning("Could not parse " + stats[8] + " to float. Skipping this line.")
+				continue
+			}
+			writesSectors, err = strconv.ParseFloat(stats[9], 64)
+			if err != nil {
+				d.log.Warning("Could not parse " + stats[9] + " to float. Skipping this line.")
+				continue
+			}
+			writesMilliseconds, err = strconv.ParseFloat(stats[10], 64)
+			if err != nil {
+				d.log.Warning("Could not parse " + stats[10] + " to float. Skipping this line.")
+				continue
+			}
+			ioInProgress, err = strconv.ParseFloat(stats[11], 64)
+			if err != nil {
+				d.log.Warning("Could not parse " + stats[11] + " to float. Skipping this line.")
+				continue
+			}
+			ioMilliseconds, err = strconv.ParseFloat(stats[12], 64)
+			if err != nil {
+				d.log.Warning("Could not parse " + stats[12] + " to float. Skipping this line.")
+				continue
+			}
+			ioMillisecondsWeighted, err = strconv.ParseFloat(stats[13], 64)
+			if err != nil {
+				d.log.Warning("Could not parse " + stats[13] + " to float. Skipping this line.")
+				continue
+			}
 			// create a deviceStats struct object and append to the deviceStatsList
-			diskIOStatsList = append(diskIOStatsList, DiskIOStats{deviceName, major, minor, values[1], reads, writes})
+			diskIOStatsList = append(diskIOStatsList, DiskIOStats{deviceName, major, minor, values[1], reads, readsMerged, readsSectors, readsMilliseconds, writes, writesMerged, writesSectors, writesMilliseconds, ioInProgress, ioMilliseconds, ioMillisecondsWeighted})
+
 		}
 	}
 	if err != io.EOF {
@@ -519,12 +802,11 @@ func (d DockerStats) ObtainDiskIOStats(diskStats map[string][]string) ([]DiskIOS
 // returns a list of DiskIOPaastaStats for the given container
 func (d DockerStats) ObtainDiskIOAndPaastaStats(container *docker.Container, diskIOStatsList []DiskIOStats, realPathGetterFunc RealPathGetter) []DiskIOPaastaStats {
 	var paastaIOStatsList []DiskIOPaastaStats
-	var deviceMountPath string
+	var deviceMountPath, containerName string
 	var err error
-	var containerName string
-	var reads float64
-	var writes float64
-	var readKey, writeKey string
+	var reads, readsMerged, readsByte, readsMilliseconds, writes, writesMerged, writesByte, writesMilliseconds, ioInProgress, ioMilliseconds, ioMillisecondsWeighted float64
+	var readsKey, readsMergedKey, readsByteKey, readsMillisecondsKey, writesKey, writesMergedKey, writesByteKey, writesMillisecondsKey, ioMillisecondsKey, ioMillisecondsWeightedKey string
+
 	// check all the mounts of the container to check if it matches the mount paths of devices on this device.
 	for _, mount := range container.Mounts {
 		mountPath := mount.Source
@@ -560,17 +842,48 @@ func (d DockerStats) ObtainDiskIOAndPaastaStats(container *docker.Container, dis
 				labels := container.Config.Labels
 				containerName = labels["io.kubernetes.container.name"]
 				// create distinct keys for each metric of each container, to be able to use the last value in the derivative
-				readKey = BuildKey(containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], "reads")
-				writeKey = BuildKey(containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], "writes")
-				// obtain the derivative for reads and writes metrics
-				reads = d.Derivative(MaxReadsValue, readKey, device.reads)
-				writes = d.Derivative(MaxWritesValue, writeKey, device.writes)
-				paastaIOStatsList = append(paastaIOStatsList, DiskIOPaastaStats{containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], reads, writes, mount.Destination})
+				readsKey = BuildKey(containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], "reads")
+				readsMergedKey = BuildKey(containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], "readsMerged")
+				readsByteKey = BuildKey(containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], "readsByte")
+				readsMillisecondsKey = BuildKey(containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], "readsMillisecondsKey")
+				writesKey = BuildKey(containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], "writes")
+				writesMergedKey = BuildKey(containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], "writesMerged")
+				writesByteKey = BuildKey(containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], "writesByte")
+				writesMillisecondsKey = BuildKey(containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], "writesMilliseconds")
+				ioMillisecondsKey = BuildKey(containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], "ioMilliseconds")
+				ioMillisecondsWeightedKey = BuildKey(containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], "ioMillisecondsWeighted")
+
+				// the max values for read sectors and write sectors depends on the platfrom architecture. Reference : https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63
+				platformArch := runtime.GOARCH
+				if platformArch == "amd64" || platformArch == "arm64" || platformArch == "arm64be" || platformArch == "ppc64" || platformArch == "ppc64le" || platformArch == "mips64" || platformArch == "mips64le" || platformArch == "s390x" || platformArch == "sparc64" {
+					// if the platform architecture is 64 bit, use 2**64 -1 else use 2**32 - 1
+					d.maxValues["readsSectors"] = 1.8446744e+19
+					d.maxValues["writesSectors"] = 1.8446744e+19
+				} else {
+					d.maxValues["readsSectors"] = 4294967295
+					d.maxValues["writesSectors"] = 4294967295
+				}
+
+				// each sector has 512 bytes, and the byte unit is byte
+				readsByte = d.Derivative(d.maxValues["readsSectors"], readsByteKey, device.readsSectors*sector_size)
+				writesByte = d.Derivative(d.maxValues["writesSectors"], writesByteKey, device.writesSectors*sector_size)
+
+				// obtain the derivative for all the metrics
+				reads = d.Derivative(d.maxValues["reads"], readsKey, device.reads)
+				readsMerged = d.Derivative(d.maxValues["readsMerged"], readsMergedKey, device.readsMerged)
+				readsMilliseconds = d.Derivative(d.maxValues["readsMilliseconds"], readsMillisecondsKey, device.readsMilliseconds)
+				writes = d.Derivative(d.maxValues["writes"], writesKey, device.writes)
+				writesMerged = d.Derivative(d.maxValues["writesMerged"], writesMergedKey, device.writesMerged)
+				writesMilliseconds = d.Derivative(d.maxValues["writesMilliseconds"], writesMillisecondsKey, device.writesMilliseconds)
+				ioInProgress = device.ioInProgress
+				ioMilliseconds = d.Derivative(d.maxValues["ioMilliseconds"], ioMillisecondsKey, device.ioMilliseconds)
+				ioMillisecondsWeighted = d.Derivative(d.maxValues["ioMillisecondsWeighted"], ioMillisecondsWeightedKey, device.ioMillisecondsWeighted)
+
+				paastaIOStatsList = append(paastaIOStatsList, DiskIOPaastaStats{containerName, device.deviceName, envVariableMap["PAASTA_SERVICE"], envVariableMap["PAASTA_INSTANCE"], envVariableMap["PAASTA_CLUSTER"], reads, readsMerged, readsByte, readsMilliseconds, writes, writesMerged, writesByte, writesMilliseconds, ioInProgress, ioMilliseconds, ioMillisecondsWeighted, mount.Destination})
 				break
 			}
 		}
 	}
-
 	return paastaIOStatsList
 }
 
